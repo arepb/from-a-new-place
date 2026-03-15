@@ -251,6 +251,57 @@
             align-items: center;
             gap: 0.75rem;
         }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            header { padding: 1.25rem 1rem 0.75rem; }
+            header h1 { font-size: 1.3rem; }
+            header p { font-size: 0.75rem; }
+
+            nav { padding: 0.75rem 1rem; gap: 1.25rem; }
+
+            .stats-bar { padding: 0.75rem 1rem; gap: 1.5rem; font-size: 0.7rem; flex-wrap: wrap; }
+
+            .controls {
+                padding: 0.75rem 1rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+            .controls label { margin-left: 0 !important; }
+            .controls select { width: 100%; }
+
+            .price-filter {
+                margin-left: 0;
+                padding-left: 0;
+                border-left: none;
+                flex-wrap: wrap;
+                width: 100%;
+            }
+            .range-slider { width: 100%; }
+            .price-presets { flex-wrap: wrap; }
+
+            main { padding: 0 0 2rem; }
+
+            /* Horizontal scroll table on mobile */
+            table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+            th, td { padding: 0.5rem 0.6rem; font-size: 0.75rem; }
+
+            .artist-thumb { width: 40px; height: 40px; }
+            .artist-cell { gap: 0.5rem; }
+            .artist-meta { font-size: 0.65rem; }
+
+            /* Hide less important columns on mobile */
+            th:nth-child(7), td:nth-child(7),
+            th:nth-child(8), td:nth-child(8) { display: none; }
+
+            .tooltip-wrap .tooltip { left: 0; transform: none; width: 220px; }
+        }
+
+        @media (max-width: 480px) {
+            header h1 { font-size: 1.1rem; }
+            th:nth-child(6), td:nth-child(6) { display: none; }
+        }
     </style>
 </head>
 <body>
