@@ -24,6 +24,9 @@ def index():
     medium_filter = request.args.get("medium", "all")
     price_min = request.args.get("price_min", 0, type=int)
     price_max = request.args.get("price_max", 0, type=int)
+    page = request.args.get("page", 1, type=int)
+    search_q = request.args.get("q", "").strip()
+    per_page = 50
 
     order_map = {
         "score": "heat_score DESC",
@@ -41,6 +44,10 @@ def index():
     if medium_filter != "all":
         extra_clauses.append("AND a.medium = ?")
         params.append(medium_filter)
+
+    if search_q:
+        extra_clauses.append("AND LOWER(a.name) LIKE ?")
+        params.append(f"%{search_q.lower()}%")
 
     price_clause = "AND ar.hammer_price_usd > 0"
     if price_min > 0:
@@ -60,6 +67,24 @@ def index():
             FROM auction_results WHERE sold = 1 AND hammer_price_usd > 0
         """).fetchone()
 
+        # Count total matching artists for pagination
+        count_params = [p for p in params]  # copy
+        total_matching = db.execute(f"""
+            SELECT COUNT(*) as c FROM (
+                SELECT a.id
+                FROM artists a
+                JOIN auction_results ar ON ar.artist_id = a.id
+                WHERE ar.sold = 1 {price_clause}
+                {medium_clause}
+                GROUP BY a.id
+                HAVING COUNT(ar.id) >= 2
+            )
+        """, count_params).fetchone()["c"]
+
+        total_pages = max(1, (total_matching + per_page - 1) // per_page)
+        page = max(1, min(page, total_pages))
+        offset = (page - 1) * per_page
+
         artists = db.execute(f"""
             SELECT a.id, a.name, a.nationality, a.birth_year, a.medium, a.tags,
                    a.image_url, a.instagram_handle,
@@ -72,6 +97,7 @@ def index():
                    COALESCE(ts.composite_score, 0) as heat_score,
                    COALESCE(ts.sell_through_rate, 0) as sell_through,
                    COALESCE(ts.estimate_beat_rate, 0) as est_beat,
+                   COALESCE(ts_prev.composite_score, -1) as prev_heat_score,
                    (SELECT ar2.image_url FROM auction_results ar2
                     WHERE ar2.artist_id = a.id AND ar2.image_url IS NOT NULL AND ar2.image_url != ''
                     ORDER BY ar2.sale_date DESC LIMIT 1) as artwork_thumb,
@@ -87,12 +113,21 @@ def index():
                 FROM trend_scores
                 WHERE id IN (SELECT MAX(id) FROM trend_scores GROUP BY artist_id)
             ) ts ON ts.artist_id = a.id
+            LEFT JOIN (
+                SELECT artist_id, composite_score
+                FROM trend_scores
+                WHERE id IN (
+                    SELECT MAX(id) FROM trend_scores
+                    WHERE id NOT IN (SELECT MAX(id) FROM trend_scores GROUP BY artist_id)
+                    GROUP BY artist_id
+                )
+            ) ts_prev ON ts_prev.artist_id = a.id
             WHERE ar.sold = 1 {price_clause}
             {medium_clause}
             GROUP BY a.id
             HAVING sale_count >= 2
             ORDER BY {order}
-            LIMIT 50
+            LIMIT {per_page} OFFSET {offset}
         """, params).fetchall()
 
         # Get available mediums for filter
@@ -107,6 +142,14 @@ def index():
         total_results = db.execute("SELECT COUNT(*) as c FROM auction_results WHERE sold = 1").fetchone()["c"]
         total_signals = db.execute("SELECT COUNT(*) as c FROM price_signals").fetchone()["c"]
 
+        # Last updated timestamp
+        last_scrape = db.execute("""
+            SELECT finished_at FROM scrape_log
+            WHERE status = 'complete' OR status = 'success'
+            ORDER BY finished_at DESC LIMIT 1
+        """).fetchone()
+        last_updated = last_scrape["finished_at"][:10] if last_scrape and last_scrape["finished_at"] else None
+
     return render_template(
         "index.html",
         artists=artists,
@@ -120,7 +163,30 @@ def index():
         total_artists=total_artists,
         total_results=total_results,
         total_signals=total_signals,
+        last_updated=last_updated,
+        page=page,
+        total_pages=total_pages,
+        total_matching=total_matching,
+        search_q=search_q,
+        pagination_qs=_build_pagination_qs(sort, medium_filter, price_min, price_max, search_q),
     )
+
+
+def _build_pagination_qs(sort, medium, price_min, price_max, search_q):
+    """Build query string for pagination links, excluding page param."""
+    from urllib.parse import urlencode
+    params = {}
+    if sort and sort != "score":
+        params["sort"] = sort
+    if medium and medium != "all":
+        params["medium"] = medium
+    if price_min > 0:
+        params["price_min"] = price_min
+    if price_max > 0:
+        params["price_max"] = price_max
+    if search_q:
+        params["q"] = search_q
+    return urlencode(params)
 
 
 @app.route("/artist/<int:artist_id>")
@@ -149,6 +215,18 @@ def artist_detail(artist_id):
             ORDER BY period DESC LIMIT 1
         """, (artist_id,)).fetchone()
 
+        # Get artwork thumbnail for og:image (use larger size for social sharing)
+        og_image_row = db.execute("""
+            SELECT image_url FROM auction_results
+            WHERE artist_id = ? AND image_url IS NOT NULL AND image_url != ''
+            ORDER BY sale_date DESC LIMIT 1
+        """, (artist_id,)).fetchone()
+        # Upscale Artsy CDN URL for social previews
+        og_image = None
+        if og_image_row and og_image_row["image_url"]:
+            og_url = og_image_row["image_url"]
+            og_image = og_url.replace("height=50", "height=600").replace("width=50", "width=600").replace("height=150", "height=600").replace("width=150", "width=600")
+
     # Build price chart
     chart_json = _build_price_chart(artist, results)
 
@@ -159,6 +237,7 @@ def artist_detail(artist_id):
         signals=signals,
         score=score,
         chart_json=chart_json,
+        og_image=og_image,
     )
 
 

@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>From A New Place — Emerging Artist Tracker</title>
+    <meta property="og:title" content="From A New Place — Emerging Artist Tracker">
+    <meta property="og:description" content="Track emerging artist auction prices. Spot rising artists early with Heat Index scoring.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -238,6 +242,55 @@
 
         .rank { color: #333; font-weight: 700; font-size: 0.85rem; }
 
+        .search-box {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            border: 1px solid #333;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            width: 180px;
+        }
+        .search-box::placeholder { color: #555; }
+        .search-box:focus { outline: none; border-color: #e74c3c; }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1.5rem 3rem;
+        }
+        .pagination a, .pagination span {
+            display: inline-block;
+            padding: 0.3rem 0.7rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+        .pagination a {
+            background: #1a1a1a;
+            border: 1px solid #333;
+        }
+        .pagination a:hover { border-color: #e74c3c; color: #fff; text-decoration: none; }
+        .pagination .current {
+            background: #e74c3c;
+            color: #fff;
+            font-weight: 600;
+        }
+        .pagination .disabled { color: #333; }
+
+        .trend-arrow {
+            font-size: 0.65rem;
+            margin-left: 0.2rem;
+        }
+        .trend-up { color: #27ae60; }
+        .trend-down { color: #e74c3c; }
+        .trend-flat { color: #555; }
+
+        .last-updated { color: #444; font-size: 0.7rem; margin-left: auto; }
+
         .artist-thumb {
             width: 60px;
             height: 60px;
@@ -296,6 +349,10 @@
             th:nth-child(8), td:nth-child(8) { display: none; }
 
             .tooltip-wrap .tooltip { left: 0; transform: none; width: 220px; }
+
+            .search-box { width: 100%; }
+            .pagination { padding: 1rem; gap: 0.3rem; flex-wrap: wrap; }
+            .last-updated { margin-left: 0; width: 100%; }
         }
 
         @media (max-width: 480px) {
@@ -328,10 +385,16 @@
             <span class="stat-label">Signals</span>
             <span class="stat-value">{{ total_signals }}</span>
         </div>
+        {% if last_updated %}
+        <span class="last-updated">Updated {{ last_updated }}</span>
+        {% endif %}
     </div>
 
     <div class="controls">
-        <label>Sort by</label>
+        <label>Search</label>
+        <input type="text" id="search-box" class="search-box" placeholder="Artist name…" value="{{ search_q }}">
+
+        <label style="margin-left: 1rem;">Sort by</label>
         <select id="sort-select">
             <option value="score" {% if sort == 'score' %}selected{% endif %}>Heat Index</option>
             <option value="sales" {% if sort == 'sales' %}selected{% endif %}>Total Sales</option>
@@ -406,7 +469,7 @@
             <tbody>
                 {% for a in artists %}
                 <tr>
-                    <td class="rank">{{ loop.index }}</td>
+                    <td class="rank">{{ (page - 1) * 50 + loop.index }}</td>
                     <td>
                         <div class="artist-cell">
                             {% if a.artwork_thumb %}
@@ -435,6 +498,14 @@
                         {% else %}
                             <span class="heat-badge heat-cold">&mdash;</span>
                         {% endif %}
+                        {% if a.prev_heat_score >= 0 and a.heat_score > 0 %}
+                            {% set diff = (a.heat_score - a.prev_heat_score) * 100 %}
+                            {% if diff > 2 %}
+                                <span class="trend-arrow trend-up">▲</span>
+                            {% elif diff < -2 %}
+                                <span class="trend-arrow trend-down">▼</span>
+                            {% endif %}
+                        {% endif %}
                     </td>
                     <td>
                         {% if a.avg_vs_estimate is not none %}
@@ -454,6 +525,34 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="{{ '/?'+ pagination_qs + '&page=' + (page-1)|string }}">&laquo; Prev</a>
+            {% else %}
+                <span class="disabled">&laquo; Prev</span>
+            {% endif %}
+
+            {% for p in range(1, total_pages + 1) %}
+                {% if p == page %}
+                    <span class="current">{{ p }}</span>
+                {% elif p <= 3 or p > total_pages - 2 or (p >= page - 1 and p <= page + 1) %}
+                    <a href="{{ '/?'+ pagination_qs + '&page=' + p|string }}">{{ p }}</a>
+                {% elif p == 4 and page > 5 %}
+                    <span class="disabled">&hellip;</span>
+                {% elif p == total_pages - 2 and page < total_pages - 4 %}
+                    <span class="disabled">&hellip;</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if page < total_pages %}
+                <a href="{{ '/?'+ pagination_qs + '&page=' + (page+1)|string }}">Next &raquo;</a>
+            {% else %}
+                <span class="disabled">Next &raquo;</span>
+            {% endif %}
+        </div>
+        {% endif %}
     </main>
 
     <script>
@@ -490,6 +589,7 @@
             const params = {
                 sort: document.getElementById('sort-select').value,
                 medium: document.getElementById('medium-select').value,
+                q: document.getElementById('search-box').value.trim(),
                 price_min: {{ price_min }},
                 price_max: {{ price_max }},
                 ...overrides
@@ -511,6 +611,15 @@
         });
         document.getElementById('medium-select').addEventListener('change', function() {
             window.location = buildUrl({ medium: this.value });
+        });
+
+        // Search with debounce
+        let searchTimer;
+        document.getElementById('search-box').addEventListener('input', function() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                window.location = buildUrl({ q: this.value.trim() });
+            }, 500);
         });
 
         // Dual range slider logic (logarithmic)

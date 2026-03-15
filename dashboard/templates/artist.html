@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ artist.name }} — From A New Place</title>
+    <meta property="og:title" content="{{ artist.name }} — From A New Place">
+    <meta property="og:description" content="Auction price trends for {{ artist.name }}{% if artist.nationality %}, {{ artist.nationality }}{% endif %}. Emerging artist tracker.">
+    <meta property="og:type" content="profile">
+    {% if og_image %}
+    <meta property="og:image" content="{{ og_image }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ og_image }}">
+    {% endif %}
+    <meta name="twitter:title" content="{{ artist.name }} — From A New Place">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
