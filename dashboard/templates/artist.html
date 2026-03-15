@@ -18,7 +18,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: #0a0a0a;
+            background: #141218;
             color: #e0e0e0;
             line-height: 1.6;
         }
@@ -27,7 +27,7 @@
 
         header {
             padding: 2rem 3rem 1rem;
-            border-bottom: 1px solid #1a1a1a;
+            border-bottom: 1px solid #231f2e;
         }
         header h1 {
             font-size: 1.8rem;
@@ -42,7 +42,7 @@
             display: flex;
             gap: 2rem;
             padding: 1rem 3rem;
-            border-bottom: 1px solid #1a1a1a;
+            border-bottom: 1px solid #231f2e;
             font-size: 0.85rem;
         }
         nav a { color: #888; font-weight: 500; }
@@ -68,7 +68,7 @@
         .tag {
             display: inline-block;
             padding: 0.15rem 0.5rem;
-            background: #1a1a1a;
+            background: #231f2e;
             border-radius: 3px;
             font-size: 0.75rem;
             color: #666;
@@ -82,8 +82,8 @@
             margin-bottom: 2rem;
         }
         .score-card {
-            background: #111;
-            border: 1px solid #1a1a1a;
+            background: #1a1720;
+            border: 1px solid #231f2e;
             border-radius: 8px;
             padding: 1rem;
         }
@@ -103,8 +103,8 @@
         .score-card .value.warm { color: #f39c12; }
 
         .chart-container {
-            background: #111;
-            border: 1px solid #1a1a1a;
+            background: #1a1720;
+            border: 1px solid #231f2e;
             border-radius: 8px;
             padding: 1.5rem;
             margin-bottom: 2rem;
@@ -134,7 +134,7 @@
         th {
             text-align: left;
             padding: 0.6rem 0.75rem;
-            border-bottom: 2px solid #222;
+            border-bottom: 2px solid #2a2636;
             color: #555;
             font-weight: 600;
             text-transform: uppercase;
@@ -143,7 +143,7 @@
         }
         td {
             padding: 0.6rem 0.75rem;
-            border-bottom: 1px solid #151515;
+            border-bottom: 1px solid #1e1b25;
         }
         tr:hover td { background: #0f0f0f; }
 
@@ -153,7 +153,7 @@
         .signal-list { list-style: none; }
         .signal-list li {
             padding: 0.75rem 0;
-            border-bottom: 1px solid #151515;
+            border-bottom: 1px solid #1e1b25;
             font-size: 0.85rem;
         }
         .signal-date { color: #555; font-size: 0.75rem; }
@@ -161,7 +161,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            background: #1a1a1a;
+            background: #231f2e;
             border: 1px solid #333;
             border-radius: 6px;
             padding: 0.3rem 0.7rem;
@@ -178,7 +178,7 @@
             height: 120px;
             border-radius: 3px;
             object-fit: cover;
-            background: #1a1a1a;
+            background: #231f2e;
         }
 
         .palette-bar {
@@ -187,7 +187,7 @@
             border-radius: 4px;
             overflow: hidden;
             margin-top: 8px;
-            border: 1px solid #222;
+            border: 1px solid #2a2636;
         }
         .palette-segment {
             transition: opacity 0.2s;
@@ -212,7 +212,7 @@
         .signal-source {
             display: inline-block;
             padding: 0.1rem 0.4rem;
-            background: #1a1a1a;
+            background: #231f2e;
             border-radius: 3px;
             font-size: 0.7rem;
             color: #888;
@@ -437,11 +437,11 @@
     <script>
         const chartData = {{ chart_json|safe }};
         // Apply dark theme
-        chartData.layout.paper_bgcolor = '#111';
-        chartData.layout.plot_bgcolor = '#111';
+        chartData.layout.paper_bgcolor = '#1a1720';
+        chartData.layout.plot_bgcolor = '#1a1720';
         chartData.layout.font = { color: '#888', family: 'Inter, system-ui, sans-serif' };
-        chartData.layout.xaxis = { ...chartData.layout.xaxis, gridcolor: '#1a1a1a', linecolor: '#222' };
-        chartData.layout.yaxis = { ...chartData.layout.yaxis, gridcolor: '#1a1a1a', linecolor: '#222' };
+        chartData.layout.xaxis = { ...chartData.layout.xaxis, gridcolor: '#231f2e', linecolor: '#2a2636' };
+        chartData.layout.yaxis = { ...chartData.layout.yaxis, gridcolor: '#231f2e', linecolor: '#2a2636' };
         Plotly.newPlot('price-chart', chartData.data, chartData.layout, { displayModeBar: false, responsive: true });
     </script>
     {% endif %}
