@@ -306,6 +306,18 @@
             align-items: center;
             gap: 0.75rem;
         }
+        .color-dots {
+            display: flex;
+            gap: 3px;
+            margin-top: 4px;
+        }
+        .color-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            border: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
+        }
 
         /* Mobile responsive */
         @media (max-width: 768px) {
@@ -487,6 +499,13 @@
                                     {{ a.nationality or '' }}{% if a.birth_year %}, b. {{ a.birth_year }}{% endif %}
                                     {% if a.medium %} &middot; <span class="tag">{{ a.medium }}</span>{% endif %}
                                 </div>
+                                {% if color_map.get(a.id) %}
+                                <div class="color-dots">
+                                    {% for c in color_map[a.id] %}
+                                    <span class="color-dot" style="background: {{ c.hex_color }};" title="{{ c.hex_color }}"></span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </td>

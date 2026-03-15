@@ -181,6 +181,34 @@
             background: #1a1a1a;
         }
 
+        .palette-bar {
+            display: flex;
+            height: 32px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+            border: 1px solid #222;
+        }
+        .palette-segment {
+            transition: opacity 0.2s;
+            cursor: default;
+            position: relative;
+        }
+        .palette-segment:hover {
+            opacity: 0.8;
+        }
+        .palette-hex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 6px;
+        }
+        .palette-hex span {
+            font-size: 0.65rem;
+            color: #666;
+            font-family: monospace;
+        }
+
         .signal-source {
             display: inline-block;
             padding: 0.1rem 0.4rem;
@@ -307,6 +335,24 @@
                 <div class="label">Signals</div>
                 <div class="value">{{ signals|length }}</div>
             </div>
+            {% if colors %}
+            <div class="score-card" style="grid-column: span 2;">
+                <div class="label">Color Palette</div>
+                <div class="palette-bar">
+                    {% for c in colors %}
+                    <div class="palette-segment"
+                         style="background: {{ c.hex_color }}; flex: {{ c.percentage }};"
+                         title="{{ c.hex_color }} ({{ '%.0f'|format(c.percentage * 100) }}%)">
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="palette-hex">
+                    {% for c in colors %}
+                    <span style="color: {{ c.hex_color }};">●</span><span>{{ c.hex_color }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         {% if chart_json %}

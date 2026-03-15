@@ -123,6 +123,19 @@ def init_db(db_path=None):
             CREATE INDEX IF NOT EXISTS idx_trend_period ON trend_scores(period);
             CREATE INDEX IF NOT EXISTS idx_trend_score ON trend_scores(composite_score);
             CREATE INDEX IF NOT EXISTS idx_signal_artist ON price_signals(artist_id);
+
+            CREATE TABLE IF NOT EXISTS artist_colors (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                artist_id INTEGER NOT NULL,
+                hex_color TEXT NOT NULL,
+                percentage REAL NOT NULL,
+                rank INTEGER NOT NULL,
+                created_at TEXT,
+                FOREIGN KEY (artist_id) REFERENCES artists(id),
+                UNIQUE(artist_id, rank)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_artist_colors_artist ON artist_colors(artist_id);
         """)
     print(f"Database initialized at {db_path or DB_PATH}")
 

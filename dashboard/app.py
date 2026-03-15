@@ -142,6 +142,22 @@ def index():
         total_results = db.execute("SELECT COUNT(*) as c FROM auction_results WHERE sold = 1").fetchone()["c"]
         total_signals = db.execute("SELECT COUNT(*) as c FROM price_signals").fetchone()["c"]
 
+        # Batch-load colors for displayed artists
+        artist_ids = [a["id"] for a in artists]
+        color_map = {}
+        if artist_ids:
+            placeholders = ",".join("?" * len(artist_ids))
+            colors = db.execute(f"""
+                SELECT artist_id, hex_color, percentage, rank
+                FROM artist_colors
+                WHERE artist_id IN ({placeholders})
+                ORDER BY artist_id, rank
+            """, artist_ids).fetchall()
+            for c in colors:
+                color_map.setdefault(c["artist_id"], []).append(
+                    {"hex_color": c["hex_color"], "percentage": c["percentage"]}
+                )
+
         # Last updated timestamp
         last_scrape = db.execute("""
             SELECT finished_at FROM scrape_log
@@ -163,6 +179,7 @@ def index():
         total_artists=total_artists,
         total_results=total_results,
         total_signals=total_signals,
+        color_map=color_map,
         last_updated=last_updated,
         page=page,
         total_pages=total_pages,
@@ -221,6 +238,14 @@ def artist_detail(artist_id):
             WHERE artist_id = ? AND image_url IS NOT NULL AND image_url != ''
             ORDER BY sale_date DESC LIMIT 1
         """, (artist_id,)).fetchone()
+        # Get artist color palette
+        colors = db.execute("""
+            SELECT hex_color, percentage, rank
+            FROM artist_colors
+            WHERE artist_id = ?
+            ORDER BY rank
+        """, (artist_id,)).fetchall()
+
         # Upscale Artsy CDN URL for social previews
         og_image = None
         if og_image_row and og_image_row["image_url"]:
@@ -238,6 +263,7 @@ def artist_detail(artist_id):
         score=score,
         chart_json=chart_json,
         og_image=og_image,
+        colors=colors,
     )
 
 
