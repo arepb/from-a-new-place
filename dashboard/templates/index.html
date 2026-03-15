@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>From A New Place — Emerging Artist Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        a { color: #e74c3c; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        header {
+            padding: 2rem 3rem 1rem;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: #fff;
+        }
+        header h1 span { color: #e74c3c; }
+        header p { color: #666; font-size: 0.85rem; margin-top: 0.25rem; }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+            padding: 1rem 3rem;
+            border-bottom: 1px solid #1a1a1a;
+            font-size: 0.85rem;
+        }
+        nav a { color: #888; font-weight: 500; }
+        nav a.active { color: #fff; border-bottom: 2px solid #e74c3c; padding-bottom: 0.5rem; }
+
+        .stats-bar {
+            display: flex;
+            gap: 3rem;
+            padding: 1.25rem 3rem;
+            background: #111;
+            border-bottom: 1px solid #1a1a1a;
+            font-size: 0.8rem;
+        }
+        .stat { display: flex; gap: 0.5rem; }
+        .stat-label { color: #555; text-transform: uppercase; letter-spacing: 0.05em; }
+        .stat-value { color: #fff; font-weight: 600; }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 3rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .controls label { color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .controls select {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            border: 1px solid #333;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* Price range scrubber */
+        .price-filter {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-left: 1rem;
+            padding-left: 1rem;
+            border-left: 1px solid #222;
+        }
+        .range-slider {
+            position: relative;
+            width: 200px;
+            height: 28px;
+        }
+        .range-slider input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            pointer-events: none;
+            top: 12px;
+        }
+        .range-slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #e74c3c;
+            cursor: pointer;
+            pointer-events: all;
+            border: 2px solid #0a0a0a;
+            position: relative;
+            z-index: 2;
+        }
+        .range-slider input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #e74c3c;
+            cursor: pointer;
+            pointer-events: all;
+            border: 2px solid #0a0a0a;
+        }
+        .range-track {
+            position: absolute;
+            top: 12px;
+            height: 4px;
+            width: 100%;
+            background: #222;
+            border-radius: 2px;
+        }
+        .range-track-fill {
+            position: absolute;
+            top: 12px;
+            height: 4px;
+            background: #e74c3c;
+            border-radius: 2px;
+        }
+        .range-values {
+            font-size: 0.8rem;
+            color: #999;
+            white-space: nowrap;
+        }
+        .range-values span { color: #fff; font-weight: 600; }
+        .price-presets {
+            display: flex;
+            gap: 0.35rem;
+        }
+        .price-presets button {
+            background: #1a1a1a;
+            color: #888;
+            border: 1px solid #333;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .price-presets button:hover { border-color: #e74c3c; color: #fff; }
+        .price-presets button.active { border-color: #e74c3c; color: #e74c3c; }
+
+        main { padding: 0 3rem 3rem; }
+
+        .tooltip-wrap {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dotted #555;
+        }
+        .tooltip-wrap .tooltip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            width: 260px;
+            font-size: 0.75rem;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+            line-height: 1.5;
+            color: #bbb;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .tooltip-wrap .tooltip strong { color: #fff; }
+        .tooltip-wrap:hover .tooltip { display: block; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid #222;
+            color: #555;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.7rem;
+        }
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #151515;
+        }
+        tr:hover td { background: #111; }
+
+        .artist-name {
+            font-weight: 600;
+            color: #fff;
+        }
+        .artist-meta {
+            color: #555;
+            font-size: 0.75rem;
+        }
+        .heat-badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 3px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .heat-hot { background: #e74c3c22; color: #e74c3c; }
+        .heat-warm { background: #f39c1222; color: #f39c12; }
+        .heat-cool { background: #3498db22; color: #3498db; }
+        .heat-cold { background: #1a1a1a; color: #555; }
+
+        .beat { color: #27ae60; }
+        .miss { color: #e74c3c; }
+
+        .price-range { color: #888; font-size: 0.8rem; }
+        .tag {
+            display: inline-block;
+            padding: 0.1rem 0.4rem;
+            background: #1a1a1a;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            color: #666;
+            margin-right: 0.25rem;
+        }
+
+        .rank { color: #333; font-weight: 700; font-size: 0.85rem; }
+
+        .artist-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #1a1a1a;
+            flex-shrink: 0;
+        }
+        .artist-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="/" style="color: inherit; text-decoration: none;">From A <span>New Place</span></a></h1>
+        <p>Emerging artist price tracker &mdash; ranked by Heat, a composite score of price momentum, sell-through rate, and estimate-beating behavior</p>
+    </header>
+
+    <nav>
+        <a href="/" class="active">Leaderboard</a>
+        <a href="/discover">Discover</a>
+    </nav>
+
+    <div class="stats-bar">
+        <div class="stat">
+            <span class="stat-label">Artists</span>
+            <span class="stat-value">{{ total_artists }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Auction Results</span>
+            <span class="stat-value">{{ total_results }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Signals</span>
+            <span class="stat-value">{{ total_signals }}</span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <label>Sort by</label>
+        <select id="sort-select">
+            <option value="score" {% if sort == 'score' %}selected{% endif %}>Heat Index</option>
+            <option value="sales" {% if sort == 'sales' %}selected{% endif %}>Total Sales</option>
+            <option value="price" {% if sort == 'price' %}selected{% endif %}>Avg Price</option>
+            <option value="recent" {% if sort == 'recent' %}selected{% endif %}>Most Recent</option>
+        </select>
+
+        <label style="margin-left: 1rem;">Medium</label>
+        <select id="medium-select">
+            <option value="all" {% if medium_filter == 'all' %}selected{% endif %}>All</option>
+            {% for m in mediums %}
+            <option value="{{ m }}" {% if medium_filter == m %}selected{% endif %}>{{ m|title }}</option>
+            {% endfor %}
+        </select>
+
+        <div class="price-filter">
+            <label>Price</label>
+            <div class="price-presets">
+                <button onclick="setPrice(0, 5000)" class="{% if price_max == 5000 %}active{% endif %}">Under $5K</button>
+                <button onclick="setPrice(0, 10000)" class="{% if price_max == 10000 %}active{% endif %}">Under $10K</button>
+                <button onclick="setPrice(0, 50000)" class="{% if price_max == 50000 %}active{% endif %}">Under $50K</button>
+                <button onclick="setPrice(0, 0)" class="{% if price_max == 0 and price_min == 0 %}active{% endif %}">All</button>
+            </div>
+            <div class="range-values">
+                <span id="price-display">
+                    {% if price_min > 0 or price_max > 0 %}
+                        ${{ "{:,}".format(price_min) }} &ndash; ${{ "{:,}".format(price_max) if price_max > 0 else "Any" }}
+                    {% else %}
+                        All prices
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="range-slider">
+            <div class="range-track"></div>
+            <div class="range-track-fill" id="track-fill"></div>
+            <input type="range" id="range-min" min="0" max="1000" step="1"
+                   value="0">
+            <input type="range" id="range-max" min="0" max="1000" step="1"
+                   value="1000">
+        </div>
+    </div>
+
+    <main>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Artist</th>
+                    <th>
+                        <span class="tooltip-wrap">Heat
+                            <span class="tooltip">
+                                <strong>Heat Index (0–100)</strong><br>
+                                Composite score combining:<br>
+                                &bull; <strong>Price velocity</strong> — are prices rising?<br>
+                                &bull; <strong>Sell-through</strong> — do lots actually sell?<br>
+                                &bull; <strong>Estimate beat</strong> — does the hammer exceed the high estimate?<br>
+                                &bull; <strong>Volume</strong> — are more lots appearing?<br>
+                                &bull; <strong>House diversity</strong> — multiple auction houses?
+                            </span>
+                        </span>
+                    </th>
+                    <th>vs Est.</th>
+                    <th>Sales</th>
+                    <th>Avg Price</th>
+                    <th>Price Range</th>
+                    <th>Houses</th>
+                    <th>Last Sale</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in artists %}
+                <tr>
+                    <td class="rank">{{ loop.index }}</td>
+                    <td>
+                        <div class="artist-cell">
+                            {% if a.artwork_thumb %}
+                                <img src="{{ a.artwork_thumb }}" class="artist-thumb" alt="" loading="lazy">
+                            {% elif a.image_url %}
+                                <img src="{{ a.image_url }}" class="artist-thumb" alt="" loading="lazy">
+                            {% else %}
+                                <div class="artist-thumb"></div>
+                            {% endif %}
+                            <div>
+                                <a href="/artist/{{ a.id }}" class="artist-name">{{ a.name }}</a>
+                                <div class="artist-meta">
+                                    {{ a.nationality or '' }}{% if a.birth_year %}, b. {{ a.birth_year }}{% endif %}
+                                    {% if a.medium %} &middot; <span class="tag">{{ a.medium }}</span>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if a.heat_score >= 0.6 %}
+                            <span class="heat-badge heat-hot">{{ "%.0f"|format(a.heat_score * 100) }}</span>
+                        {% elif a.heat_score >= 0.3 %}
+                            <span class="heat-badge heat-warm">{{ "%.0f"|format(a.heat_score * 100) }}</span>
+                        {% elif a.heat_score > 0 %}
+                            <span class="heat-badge heat-cool">{{ "%.0f"|format(a.heat_score * 100) }}</span>
+                        {% else %}
+                            <span class="heat-badge heat-cold">&mdash;</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if a.avg_vs_estimate is not none %}
+                            {% if a.avg_vs_estimate > 0 %}
+                                <span class="beat">+{{ "%.0f"|format(a.avg_vs_estimate) }}%</span>
+                            {% else %}
+                                <span class="miss">{{ "%.0f"|format(a.avg_vs_estimate) }}%</span>
+                            {% endif %}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>{{ a.sale_count }}</td>
+                    <td>${{ "{:,.0f}".format(a.avg_price) }}</td>
+                    <td class="price-range">${{ "{:,.0f}".format(a.min_price) }} &ndash; ${{ "{:,.0f}".format(a.max_price) }}</td>
+                    <td>{{ a.house_count }}</td>
+                    <td>{{ a.latest_sale or '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+
+    <script>
+        const globalMax = {{ global_price_max }};
+        const SLIDER_MAX = 1000;
+        // Log scale: slider position 0-1000 maps to $0 - globalMax
+        // Using log scale so lower prices get more slider real estate
+        // Position 0 = $0, position 500 ≈ $5K, position 750 ≈ $100K, position 1000 = globalMax
+
+        const LOG_MIN = Math.log10(100);          // $100 is the practical floor
+        const LOG_MAX = Math.log10(globalMax);
+
+        function sliderToPrice(pos) {
+            if (pos <= 0) return 0;
+            if (pos >= SLIDER_MAX) return globalMax;
+            const logVal = LOG_MIN + (pos / SLIDER_MAX) * (LOG_MAX - LOG_MIN);
+            const price = Math.pow(10, logVal);
+            // Round to nice numbers
+            if (price < 1000) return Math.round(price / 50) * 50;
+            if (price < 10000) return Math.round(price / 500) * 500;
+            if (price < 100000) return Math.round(price / 1000) * 1000;
+            if (price < 1000000) return Math.round(price / 5000) * 5000;
+            return Math.round(price / 50000) * 50000;
+        }
+
+        function priceToSlider(price) {
+            if (price <= 0) return 0;
+            if (price >= globalMax) return SLIDER_MAX;
+            const logVal = Math.log10(Math.max(price, 100));
+            return Math.round(((logVal - LOG_MIN) / (LOG_MAX - LOG_MIN)) * SLIDER_MAX);
+        }
+
+        function buildUrl(overrides = {}) {
+            const params = {
+                sort: document.getElementById('sort-select').value,
+                medium: document.getElementById('medium-select').value,
+                price_min: {{ price_min }},
+                price_max: {{ price_max }},
+                ...overrides
+            };
+            const qs = new URLSearchParams();
+            for (const [k, v] of Object.entries(params)) {
+                if (v && v !== 'all' && v !== 0 && v !== '0') qs.set(k, v);
+                else if (k === 'sort') qs.set(k, v);
+            }
+            return '/?' + qs.toString();
+        }
+
+        function setPrice(min, max) {
+            window.location = buildUrl({ price_min: min, price_max: max });
+        }
+
+        document.getElementById('sort-select').addEventListener('change', function() {
+            window.location = buildUrl();
+        });
+        document.getElementById('medium-select').addEventListener('change', function() {
+            window.location = buildUrl({ medium: this.value });
+        });
+
+        // Dual range slider logic (logarithmic)
+        const rangeMin = document.getElementById('range-min');
+        const rangeMax = document.getElementById('range-max');
+        const trackFill = document.getElementById('track-fill');
+        const priceDisplay = document.getElementById('price-display');
+        let debounceTimer;
+
+        // Set initial slider positions from current price filter
+        rangeMin.value = priceToSlider({{ price_min }});
+        rangeMax.value = {% if price_max > 0 %}priceToSlider({{ price_max }}){% else %}SLIDER_MAX{% endif %};
+
+        function formatPrice(v) {
+            if (v >= 1000000) return '$' + (v / 1000000).toFixed(1) + 'M';
+            if (v >= 1000) return '$' + (v / 1000).toFixed(0) + 'K';
+            return '$' + v;
+        }
+
+        function updateSlider() {
+            let minPos = parseInt(rangeMin.value);
+            let maxPos = parseInt(rangeMax.value);
+            if (minPos > maxPos) { [rangeMin.value, rangeMax.value] = [maxPos, minPos]; minPos = parseInt(rangeMin.value); maxPos = parseInt(rangeMax.value); }
+
+            const pctMin = (minPos / SLIDER_MAX) * 100;
+            const pctMax = (maxPos / SLIDER_MAX) * 100;
+            trackFill.style.left = pctMin + '%';
+            trackFill.style.width = (pctMax - pctMin) + '%';
+
+            const priceMin = sliderToPrice(minPos);
+            const priceMax = sliderToPrice(maxPos);
+
+            if (minPos === 0 && maxPos >= SLIDER_MAX) {
+                priceDisplay.innerHTML = 'All prices';
+            } else {
+                priceDisplay.innerHTML = formatPrice(priceMin) + ' \u2013 ' + formatPrice(priceMax);
+            }
+        }
+
+        function applySlider() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const minPos = parseInt(rangeMin.value);
+                const maxPos = parseInt(rangeMax.value);
+                const pMin = minPos > 0 ? sliderToPrice(minPos) : 0;
+                const pMax = maxPos < SLIDER_MAX ? sliderToPrice(maxPos) : 0;
+                window.location = buildUrl({ price_min: pMin, price_max: pMax });
+            }, 600);
+        }
+
+        rangeMin.addEventListener('input', updateSlider);
+        rangeMax.addEventListener('input', updateSlider);
+        rangeMin.addEventListener('change', applySlider);
+        rangeMax.addEventListener('change', applySlider);
+        updateSlider();
+    </script>
+</body>
+</html>

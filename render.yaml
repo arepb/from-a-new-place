@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: from-a-new-place
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: cd dashboard && gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.0

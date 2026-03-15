@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ artist.name }} — From A New Place</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        a { color: #e74c3c; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        header {
+            padding: 2rem 3rem 1rem;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: #fff;
+        }
+        header h1 span { color: #e74c3c; }
+        header p { color: #666; font-size: 0.85rem; margin-top: 0.25rem; }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+            padding: 1rem 3rem;
+            border-bottom: 1px solid #1a1a1a;
+            font-size: 0.85rem;
+        }
+        nav a { color: #888; font-weight: 500; }
+
+        main { padding: 2rem 3rem 3rem; max-width: 1200px; }
+
+        .back { color: #555; font-size: 0.85rem; margin-bottom: 1.5rem; display: block; }
+
+        .artist-header {
+            margin-bottom: 2rem;
+        }
+        .artist-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.03em;
+        }
+        .artist-header .meta {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        .tag {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            background: #1a1a1a;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            color: #666;
+            margin-right: 0.25rem;
+        }
+
+        .score-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .score-card {
+            background: #111;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        .score-card .label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #555;
+        }
+        .score-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 0.25rem;
+        }
+        .score-card .value.hot { color: #e74c3c; }
+        .score-card .value.warm { color: #f39c12; }
+
+        .chart-container {
+            background: #111;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .chart-container h3 {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            margin-top: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th {
+            text-align: left;
+            padding: 0.6rem 0.75rem;
+            border-bottom: 2px solid #222;
+            color: #555;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.7rem;
+        }
+        td {
+            padding: 0.6rem 0.75rem;
+            border-bottom: 1px solid #151515;
+        }
+        tr:hover td { background: #0f0f0f; }
+
+        .beat { color: #27ae60; }
+        .miss { color: #e74c3c; }
+
+        .signal-list { list-style: none; }
+        .signal-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #151515;
+            font-size: 0.85rem;
+        }
+        .signal-date { color: #555; font-size: 0.75rem; }
+        .ig-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 0.3rem 0.7rem;
+            font-size: 0.8rem;
+            color: #e0e0e0;
+            margin-top: 0.5rem;
+            transition: border-color 0.2s;
+        }
+        .ig-link:hover { border-color: #e74c3c; text-decoration: none; }
+        .ig-link svg { width: 16px; height: 16px; fill: #e0e0e0; }
+
+        .lot-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 3px;
+            object-fit: cover;
+            background: #1a1a1a;
+        }
+
+        .signal-source {
+            display: inline-block;
+            padding: 0.1rem 0.4rem;
+            background: #1a1a1a;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="/" style="color: inherit; text-decoration: none;">From A <span>New Place</span></a></h1>
+        <p>Emerging artist price tracker</p>
+    </header>
+
+    <nav>
+        <a href="/">Leaderboard</a>
+        <a href="/discover">Discover</a>
+    </nav>
+
+    <main>
+        <a href="/" class="back">&larr; Back to leaderboard</a>
+
+        <div class="artist-header">
+            <h2>{{ artist.name }}</h2>
+            <div class="meta">
+                {{ artist.nationality or '' }}{% if artist.birth_year %}, b. {{ artist.birth_year }}{% endif %}{% if artist.death_year %} &ndash; d. {{ artist.death_year }}{% endif %}
+                {% if artist.medium %} &middot; <span class="tag">{{ artist.medium }}</span>{% endif %}
+                {% if artist.tags %}
+                    {% for t in artist.tags.split(',') %}
+                        <span class="tag">{{ t.strip() }}</span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            {% if artist.instagram_handle %}
+            <a href="https://www.instagram.com/{{ artist.instagram_handle }}/" target="_blank" class="ig-link">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                @{{ artist.instagram_handle }}
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="score-cards">
+            <div class="score-card" style="position: relative; cursor: help;" title="Composite score (0–100) combining price velocity, sell-through rate, estimate beat rate, volume increase, and auction house diversity.">
+                <div class="label">Heat Index</div>
+                <div class="value {% if score and score.composite_score >= 0.6 %}hot{% elif score and score.composite_score >= 0.3 %}warm{% endif %}">
+                    {{ "%.0f"|format(score.composite_score * 100) if score else '—' }}
+                </div>
+            </div>
+            <div class="score-card">
+                <div class="label">Total Sales</div>
+                <div class="value">{{ results|length }}</div>
+            </div>
+            <div class="score-card">
+                <div class="label">Avg Price</div>
+                <div class="value">
+                    {% if results %}
+                        ${{ "{:,.0f}".format(results|map(attribute='hammer_price_usd')|select('ne', None)|list|sum / (results|map(attribute='hammer_price_usd')|select('ne', None)|list|length or 1)) }}
+                    {% else %}—{% endif %}
+                </div>
+            </div>
+            <div class="score-card">
+                <div class="label">Sell-Through</div>
+                <div class="value">{{ "%.0f%%"|format((score.sell_through_rate or 0) * 100) if score else '—' }}</div>
+            </div>
+            <div class="score-card">
+                <div class="label">Est. Beat Rate</div>
+                <div class="value">{{ "%.0f%%"|format((score.estimate_beat_rate or 0) * 100) if score else '—' }}</div>
+            </div>
+            <div class="score-card">
+                <div class="label">Signals</div>
+                <div class="value">{{ signals|length }}</div>
+            </div>
+        </div>
+
+        {% if chart_json %}
+        <div class="chart-container">
+            <h3>Price History</h3>
+            <div id="price-chart"></div>
+        </div>
+        {% endif %}
+
+        <h3 class="section-title">Auction Results</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Date</th>
+                    <th>House</th>
+                    <th>Title</th>
+                    <th>Medium</th>
+                    <th>Estimate</th>
+                    <th>Hammer Price</th>
+                    <th>vs Est.</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results|reverse %}
+                <tr>
+                    <td>
+                        {% if r.image_url %}
+                            <img src="{{ r.image_url }}" class="lot-thumb" alt="" loading="lazy">
+                        {% endif %}
+                    </td>
+                    <td>{{ r.sale_date or '—' }}</td>
+                    <td>{{ r.auction_house or '—' }}</td>
+                    <td>
+                        {% if r.sale_url %}
+                            <a href="{{ r.sale_url }}" target="_blank" style="color: #e74c3c;">{{ (r.title or 'Untitled')[:40] }}</a>
+                        {% else %}
+                            {{ (r.title or 'Untitled')[:40] }}
+                        {% endif %}
+                    </td>
+                    <td>{{ (r.medium or '')[:25] }}</td>
+                    <td>
+                        {% if r.estimate_low and r.estimate_high %}
+                            ${{ "{:,.0f}".format(r.estimate_low) }}–${{ "{:,.0f}".format(r.estimate_high) }}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>${{ "{:,.0f}".format(r.hammer_price_usd) if r.hammer_price_usd else '—' }}</td>
+                    <td>
+                        {% if r.hammer_price_usd and r.estimate_high and r.estimate_high > 0 %}
+                            {% set pct = ((r.hammer_price_usd - r.estimate_high) / r.estimate_high * 100) %}
+                            {% if pct > 0 %}
+                                <span class="beat">+{{ "%.0f"|format(pct) }}%</span>
+                            {% else %}
+                                <span class="miss">{{ "%.0f"|format(pct) }}%</span>
+                            {% endif %}
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if signals %}
+        <h3 class="section-title">Signals</h3>
+        <ul class="signal-list">
+            {% for s in signals %}
+            <li>
+                <span class="signal-date">{{ s.signal_date }}</span>
+                <span class="signal-source">{{ s.source }}</span>
+                {{ s.details[:80] }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </main>
+
+    {% if chart_json %}
+    <script>
+        const chartData = {{ chart_json|safe }};
+        // Apply dark theme
+        chartData.layout.paper_bgcolor = '#111';
+        chartData.layout.plot_bgcolor = '#111';
+        chartData.layout.font = { color: '#888', family: 'Inter, system-ui, sans-serif' };
+        chartData.layout.xaxis = { ...chartData.layout.xaxis, gridcolor: '#1a1a1a', linecolor: '#222' };
+        chartData.layout.yaxis = { ...chartData.layout.yaxis, gridcolor: '#1a1a1a', linecolor: '#222' };
+        Plotly.newPlot('price-chart', chartData.data, chartData.layout, { displayModeBar: false, responsive: true });
+    </script>
+    {% endif %}
+</body>
+</html>

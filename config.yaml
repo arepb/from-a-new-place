@@ -1,0 +1,76 @@
+# ArtScope Configuration
+
+# Maximum price in USD to track — filters out everything above this
+max_price_usd: 5000
+
+# Scraping settings
+scraping:
+  min_delay_seconds: 2
+  max_delay_seconds: 5
+  max_retries: 3
+  max_pages_per_source: 10
+
+# Data sources and their scrape schedules
+sources:
+  # Tier 1 — Auction Aggregators
+  invaluable:
+    enabled: true
+    schedule: weekly
+    categories:
+      - "contemporary art"
+      - "emerging art"
+      - "prints multiples"
+      - "photography"
+      - "works on paper"
+      - "ceramics"
+      - "textile art"
+      - "mixed media"
+
+  heritage:
+    enabled: true
+    schedule: weekly
+    categories:
+      - "contemporary"
+      - "illustration"
+      - "prints"
+      - "photography"
+
+  # Tier 3 — Signal sources
+  signals:
+    google_trends:
+      enabled: true
+      schedule: weekly
+
+    editorial:
+      enabled: true
+      schedule: daily
+      feeds:
+        - name: "Artforum"
+          url: "https://www.artforum.com/rss"
+        - name: "Hyperallergic"
+          url: "https://hyperallergic.com/feed/"
+        - name: "Frieze"
+          url: "https://www.frieze.com/rss"
+        - name: "ARTnews"
+          url: "https://www.artnews.com/feed/"
+        - name: "The Art Newspaper"
+          url: "https://www.theartnewspaper.com/rss"
+
+# Heat Index scoring weights
+heat_index:
+  price_velocity: 0.30
+  sell_through_rate: 0.20
+  estimate_beat_rate: 0.15
+  volume_increase: 0.10
+  editorial_signals: 0.10
+  social_momentum: 0.10
+  source_diversification: 0.05
+
+# Alert thresholds
+alerts:
+  # Minimum composite score to trigger an alert
+  min_score: 0.6
+  # Minimum number of sales to be scored
+  min_sales: 3
+  # How many months of data needed before scoring
+  min_history_months: 2
