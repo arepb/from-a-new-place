@@ -77,7 +77,7 @@ def fetch_artist_results(artist_name, max_results=50):
               images {
                 thumbnail {
                   url
-                  cropped(width: 50, height: 50) {
+                  cropped(width: 150, height: 150) {
                     url
                   }
                 }
