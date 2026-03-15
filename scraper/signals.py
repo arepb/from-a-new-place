@@ -66,6 +66,7 @@ def scan_editorial_feeds(artist_names, feeds=None):
                                 "signal_date": pub_date,
                                 "source": feed_info["name"],
                                 "details": title[:200],
+                                "url": entry.get("link", ""),
                             })
                             logger.info(
                                 f"Signal: {full_name} mentioned in {feed_info['name']}: {title[:80]}"

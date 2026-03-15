@@ -79,6 +79,7 @@ def init_db(db_path=None):
                 signal_date TEXT,
                 source TEXT,
                 details TEXT,
+                url TEXT,
                 created_at TEXT DEFAULT (datetime('now')),
                 FOREIGN KEY (artist_id) REFERENCES artists(id)
             );

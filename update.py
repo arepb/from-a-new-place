@@ -121,10 +121,10 @@ def run():
                     continue
                 db.execute(
                     """INSERT INTO price_signals
-                       (artist_id, signal_type, signal_date, source, details)
-                       VALUES (?, ?, ?, ?, ?)""",
+                       (artist_id, signal_type, signal_date, source, details, url)
+                       VALUES (?, ?, ?, ?, ?, ?)""",
                     (artist_id, sig["signal_type"], sig["signal_date"],
-                     sig["source"], sig["details"]),
+                     sig["source"], sig["details"], sig.get("url", "")),
                 )
                 sig_count += 1
 

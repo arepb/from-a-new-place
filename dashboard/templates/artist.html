@@ -368,7 +368,11 @@
             <li>
                 <span class="signal-date">{{ s.signal_date }}</span>
                 <span class="signal-source">{{ s.source }}</span>
-                {{ s.details[:80] }}
+                {% if s.url %}
+                    <a href="{{ s.url }}" target="_blank" style="color: #999;">{{ s.details[:80] }}</a>
+                {% else %}
+                    {{ s.details[:80] }}
+                {% endif %}
             </li>
             {% endfor %}
         </ul>
