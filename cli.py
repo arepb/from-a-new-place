@@ -35,7 +35,7 @@ def setup():
 
 
 @cli.command()
-@click.option("--source", type=click.Choice(["artsy", "heritage", "invaluable", "all"]), default="artsy")
+@click.option("--source", type=click.Choice(["artsy", "liveauctioneers", "heritage", "invaluable", "all"]), default="artsy")
 @click.option("--query", "-q", default=None, help="Search query (e.g. 'contemporary painting')")
 @click.option("--pages", "-p", default=5, help="Max pages to scrape per source")
 @click.option("--max-results", default=50, help="Max results per artist (Artsy)")
@@ -96,6 +96,47 @@ def scrape(source, query, pages, max_results):
 
             total_new += new_count
             click.echo(f"  Artsy: {len(results)} results, {new_count} new records")
+
+    # LiveAuctioneers — secondary source (page scraping)
+    if source in ("liveauctioneers", "all"):
+        click.echo("\nScraping LiveAuctioneers...")
+        from scraper.liveauctioneers import fetch_all_artists as la_fetch_all
+
+        with get_db() as db:
+            rows = db.execute("SELECT name FROM artists ORDER BY name").fetchall()
+            artist_names = [r["name"] for r in rows]
+
+            cursor = db.execute(
+                "INSERT INTO scrape_log (source) VALUES (?)", ("liveauctioneers",)
+            )
+            log_id = cursor.lastrowid
+
+        if artist_names:
+            click.echo(f"  Fetching results for {len(artist_names)} artists...")
+            la_data = la_fetch_all(artist_names, max_results_per=max_results)
+            la_results = la_data["results"]
+            new_count = 0
+
+            with get_db() as db:
+                for r in la_results:
+                    artist_name = r.pop("artist_name")
+                    artist_id = find_or_create_artist(
+                        db, artist_name,
+                        first_seen_date=datetime.now().strftime("%Y-%m-%d"),
+                        first_seen_source="liveauctioneers",
+                    )
+                    if insert_auction_result(db, artist_id, **r):
+                        new_count += 1
+
+                db.execute(
+                    """UPDATE scrape_log SET finished_at = datetime('now'),
+                       status = 'complete', records_found = ?, records_new = ?
+                       WHERE id = ?""",
+                    (len(la_results), new_count, log_id),
+                )
+
+            total_new += new_count
+            click.echo(f"  LiveAuctioneers: {len(la_results)} results, {new_count} new records")
 
     # Heritage and Invaluable scrapers (may be blocked by bot detection)
     page_scrapers = []

@@ -95,7 +95,7 @@ def run():
             "SELECT COUNT(*) as c FROM auction_results"
         ).fetchone()["c"]
 
-    logger.info(f"Auction results: {results_before} → {results_after} (+{new_count} new)")
+    logger.info(f"Artsy results: {results_before} → {results_after} (+{new_count} new)")
 
     # --- Step 3: Scan editorial signals ---
     logger.info("")
