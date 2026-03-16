@@ -459,7 +459,7 @@ def _build_price_chart(artist, results):
         marker=dict(size=10, color=marker_colors, line=dict(width=1, color="white")),
         hovertext=hover_text,
         hoverinfo="text",
-        name="Hammer Price",
+        showlegend=False,
     ))
 
     # Add per-lot estimate shading colored by outcome
