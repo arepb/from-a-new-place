@@ -417,6 +417,23 @@ def _build_price_chart(artist, results):
     if not dates:
         return None
 
+    # Build per-point colors: green if above estimate high, red if below estimate low, grey if no estimate
+    marker_colors = []
+    for r in results:
+        if not (r["sale_date"] and r["hammer_price_usd"]):
+            continue
+        price = r["hammer_price_usd"]
+        est_high = r["estimate_high"]
+        est_low = r["estimate_low"]
+        if est_high and price > est_high:
+            marker_colors.append("#27ae60")  # green — beat estimate
+        elif est_low and price < est_low:
+            marker_colors.append("#e74c3c")  # red — below estimate
+        elif est_high:
+            marker_colors.append("#f39c12")  # amber — within range
+        else:
+            marker_colors.append("#999")     # grey — no estimate data
+
     hover_text = [
         f"<b>{t[:40]}</b><br>{h}<br>${p:,.0f}"
         for t, h, p in zip(titles, houses, prices)
@@ -424,36 +441,57 @@ def _build_price_chart(artist, results):
 
     fig = go.Figure()
 
+    # Connecting line (neutral, behind dots)
     fig.add_trace(go.Scatter(
         x=dates,
         y=prices,
-        mode="markers+lines",
-        marker=dict(size=10, color="#e74c3c", line=dict(width=1, color="#c0392b")),
-        line=dict(color="#e74c3c", width=2, dash="dot"),
+        mode="lines",
+        line=dict(color="rgba(0,0,0,0.15)", width=1.5, dash="dot"),
+        hoverinfo="skip",
+        showlegend=False,
+    ))
+
+    # Dots colored by estimate performance
+    fig.add_trace(go.Scatter(
+        x=dates,
+        y=prices,
+        mode="markers",
+        marker=dict(size=10, color=marker_colors, line=dict(width=1, color="white")),
         hovertext=hover_text,
         hoverinfo="text",
         name="Hammer Price",
     ))
 
-    # Add estimate bands if available
-    est_dates = []
-    est_lows = []
-    est_highs = []
+    # Add per-lot estimate shading colored by outcome
     for r in results:
-        if r["sale_date"] and r["estimate_low"] and r["estimate_high"]:
-            est_dates.append(r["sale_date"])
-            est_lows.append(r["estimate_low"])
-            est_highs.append(r["estimate_high"])
+        if not (r["sale_date"] and r["estimate_low"] and r["estimate_high"] and r["hammer_price_usd"]):
+            continue
+        price = r["hammer_price_usd"]
+        if price > r["estimate_high"]:
+            fill_color = "rgba(39, 174, 96, 0.12)"   # green
+            line_color = "rgba(39, 174, 96, 0.25)"
+        elif price < r["estimate_low"]:
+            fill_color = "rgba(231, 76, 60, 0.12)"    # red
+            line_color = "rgba(231, 76, 60, 0.25)"
+        else:
+            fill_color = "rgba(243, 156, 18, 0.10)"   # amber
+            line_color = "rgba(243, 156, 18, 0.20)"
 
-    if est_dates:
+        fig.add_shape(
+            type="rect",
+            x0=r["sale_date"], x1=r["sale_date"],
+            y0=r["estimate_low"], y1=r["estimate_high"],
+            fillcolor=fill_color,
+            line=dict(color=line_color, width=1),
+            layer="below",
+        )
+
+    # Legend items for color meaning
+    for color, name in [("#27ae60", "Above Estimate"), ("#e74c3c", "Below Estimate"), ("#f39c12", "Within Range")]:
         fig.add_trace(go.Scatter(
-            x=est_dates + est_dates[::-1],
-            y=est_highs + est_lows[::-1],
-            fill="toself",
-            fillcolor="rgba(52, 152, 219, 0.15)",
-            line=dict(color="rgba(52, 152, 219, 0.3)"),
-            hoverinfo="skip",
-            name="Estimate Range",
+            x=[None], y=[None], mode="markers",
+            marker=dict(size=8, color=color),
+            name=name, showlegend=True,
         ))
 
     fig.update_layout(
