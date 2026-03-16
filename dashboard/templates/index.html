@@ -3,13 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>From A New Place — Emerging Artist Tracker</title>
+    <title>From A New Place — Emerging Artist Auction Price Tracker</title>
+    <meta name="description" content="Track {{ total_artists }} emerging artists across {{ total_results|int }} auction results. Heat Index scoring ranks artists by price momentum, sell-through rates, and estimate-beating behavior.">
+    <link rel="canonical" href="https://fromanewplace.com/">
     <meta property="og:title" content="From A New Place: Emerging Artist Tracker">
-    <meta property="og:description" content="Track emerging artist auction prices. Spot rising artists early with Heat Index scoring.">
+    <meta property="og:description" content="Track emerging artist auction prices. Spot rising artists early with Heat Index scoring across {{ total_results|int }} auction results.">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="https://from-a-new-place.onrender.com/static/og-image.png">
+    <meta property="og:url" content="https://fromanewplace.com/">
+    <meta property="og:site_name" content="From A New Place">
+    <meta property="og:image" content="https://fromanewplace.com/static/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://from-a-new-place.onrender.com/static/og-image.png">
+    <meta name="twitter:title" content="From A New Place: Emerging Artist Tracker">
+    <meta name="twitter:description" content="Track emerging artist auction prices. Spot rising artists early with Heat Index scoring.">
+    <meta name="twitter:image" content="https://fromanewplace.com/static/og-image.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "From A New Place",
+        "url": "https://fromanewplace.com",
+        "description": "Emerging artist auction price tracker with Heat Index scoring",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://fromanewplace.com/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Emerging Artist Heat Index",
+        "description": "Top emerging artists ranked by auction market performance",
+        "numberOfItems": {{ total_matching }},
+        "itemListElement": [
+            {% for a in artists %}
+            {
+                "@type": "ListItem",
+                "position": {{ (page - 1) * 50 + loop.index }},
+                "url": "https://fromanewplace.com/artist/{{ a.slug or a.id }}",
+                "name": "{{ a.name }}"
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    }
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {

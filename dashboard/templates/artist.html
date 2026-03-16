@@ -3,16 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ artist.name }} — From A New Place</title>
+    <title>{{ artist.name }} Auction Results & Price History — From A New Place</title>
+    <meta name="description" content="Auction price history for {{ artist.name }}{% if artist.nationality %}, {{ artist.nationality }} artist{% endif %}{% if artist.birth_year %} (b. {{ artist.birth_year }}){% endif %}. {{ results|length }} auction results tracked with Heat Index scoring.">
+    <link rel="canonical" href="https://fromanewplace.com/artist/{{ artist.slug }}">
     <meta property="og:title" content="{{ artist.name }} — From A New Place">
-    <meta property="og:description" content="Auction price trends for {{ artist.name }}{% if artist.nationality %}, {{ artist.nationality }}{% endif %}. Emerging artist tracker.">
+    <meta property="og:description" content="Auction price trends for {{ artist.name }}{% if artist.nationality %}, {{ artist.nationality }}{% endif %}. {{ results|length }} results tracked.">
     <meta property="og:type" content="profile">
+    <meta property="og:url" content="https://fromanewplace.com/artist/{{ artist.slug }}">
+    <meta property="og:site_name" content="From A New Place">
     {% if og_image %}
     <meta property="og:image" content="{{ og_image }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="{{ og_image }}">
     {% endif %}
     <meta name="twitter:title" content="{{ artist.name }} — From A New Place">
+    <meta name="twitter:description" content="Auction price trends for {{ artist.name }}. {{ results|length }} results tracked.">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "{{ artist.name }}",
+        "url": "https://fromanewplace.com/artist/{{ artist.slug }}"
+        {% if artist.nationality %},"nationality": {"@type": "Country", "name": "{{ artist.nationality }}"}{% endif %}
+        {% if artist.birth_year %},"birthDate": "{{ artist.birth_year }}"{% endif %}
+        {% if artist.medium %},"knowsAbout": "{{ artist.medium }}"{% endif %}
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Discover", "item": "https://fromanewplace.com/"},
+            {"@type": "ListItem", "position": 2, "name": "{{ artist.name }}", "item": "https://fromanewplace.com/artist/{{ artist.slug }}"}
+        ]
+    }
+    </script>
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }

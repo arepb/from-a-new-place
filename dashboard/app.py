@@ -9,7 +9,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, Response, make_response
 import plotly
 import plotly.graph_objects as go
 
@@ -509,6 +509,108 @@ def _build_price_chart(artist, results):
     )
 
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+
+SITE_URL = "https://fromanewplace.com"
+
+
+@app.route("/sitemap.xml")
+def sitemap():
+    """Dynamic XML sitemap for Google Search Console."""
+    pages = [
+        {"loc": "/", "changefreq": "daily", "priority": "1.0"},
+        {"loc": "/gallery", "changefreq": "daily", "priority": "0.8"},
+        {"loc": "/discover", "changefreq": "daily", "priority": "0.7"},
+    ]
+
+    with get_db() as db:
+        artists = db.execute("""
+            SELECT slug, MAX(ar.sale_date) as last_sale
+            FROM artists a
+            LEFT JOIN auction_results ar ON ar.artist_id = a.id
+            WHERE a.slug IS NOT NULL
+            GROUP BY a.id
+            ORDER BY a.name
+        """).fetchall()
+
+    xml = ['<?xml version="1.0" encoding="UTF-8"?>']
+    xml.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    for p in pages:
+        xml.append(f'  <url><loc>{SITE_URL}{p["loc"]}</loc>'
+                   f'<changefreq>{p["changefreq"]}</changefreq>'
+                   f'<priority>{p["priority"]}</priority></url>')
+    for a in artists:
+        lastmod = f"<lastmod>{a['last_sale']}</lastmod>" if a["last_sale"] else ""
+        xml.append(f'  <url><loc>{SITE_URL}/artist/{a["slug"]}</loc>'
+                   f'{lastmod}<changefreq>weekly</changefreq>'
+                   f'<priority>0.6</priority></url>')
+    xml.append('</urlset>')
+
+    resp = make_response("\n".join(xml))
+    resp.headers["Content-Type"] = "application/xml"
+    return resp
+
+
+@app.route("/robots.txt")
+def robots():
+    """Robots.txt with sitemap reference."""
+    txt = f"""User-agent: *
+Allow: /
+
+Sitemap: {SITE_URL}/sitemap.xml
+"""
+    resp = make_response(txt)
+    resp.headers["Content-Type"] = "text/plain"
+    return resp
+
+
+@app.route("/llms.txt")
+def llms_txt():
+    """LLMs.txt for AI crawler discoverability (llmstxt.org standard)."""
+    with get_db() as db:
+        total_artists = db.execute("SELECT COUNT(*) as c FROM artists").fetchone()["c"]
+        total_results = db.execute("SELECT COUNT(*) as c FROM auction_results WHERE sold = 1").fetchone()["c"]
+        top_artists = db.execute("""
+            SELECT a.name FROM artists a
+            JOIN trend_scores ts ON ts.artist_id = a.id
+            WHERE ts.id IN (SELECT MAX(id) FROM trend_scores GROUP BY artist_id)
+            ORDER BY ts.composite_score DESC LIMIT 10
+        """).fetchall()
+
+    top_list = ", ".join(a["name"] for a in top_artists)
+    txt = f"""# From A New Place
+
+> Emerging artist auction price tracker. Tracks {total_artists} artists across {total_results:,} auction results from major auction houses worldwide.
+
+## What This Site Does
+
+From A New Place monitors auction results for emerging and contemporary artists, scoring them with a composite "Heat Index" based on price momentum, sell-through rates, estimate-beating behavior, editorial mentions, and social momentum.
+
+## Key Pages
+
+- [Discover]({SITE_URL}/): Main leaderboard ranked by Heat Index score. Sortable by price, sales volume, and recency. Filterable by medium and price range.
+- [Gallery]({SITE_URL}/gallery): Visual grid of recent auction works with thumbnails, prices, and artist attribution.
+- [Signals]({SITE_URL}/discover): Editorial mentions and market signals from 11 publications including NYT, WSJ, Financial Times, Frieze, ARTnews, and The Art Newspaper.
+
+## Data
+
+- **Artists tracked**: {total_artists}
+- **Auction results**: {total_results:,}
+- **Sources**: Artsy, Christie's, Sotheby's, Phillips, Heritage, Bonhams, and more
+- **Update frequency**: Biweekly
+- **Top artists by Heat Index**: {top_list}
+
+## Artist Pages
+
+Each artist has a dedicated page at {SITE_URL}/artist/{{artist-slug}} with:
+- Price history chart (color-coded by estimate performance)
+- Complete auction results table
+- Color palette analysis
+- Editorial signals and mentions
+"""
+    resp = make_response(txt)
+    resp.headers["Content-Type"] = "text/plain; charset=utf-8"
+    return resp
 
 
 if __name__ == "__main__":
