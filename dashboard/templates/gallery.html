@@ -107,6 +107,37 @@
             margin-top: 0.1rem;
         }
 
+        .shuffle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.25rem;
+            border: 1px solid #e0d5d5;
+            border-radius: 100px;
+            background: #fff;
+            color: #1a1a1a;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 1.5rem;
+        }
+        .shuffle-btn:hover {
+            border-color: #c0392b;
+            color: #c0392b;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(192,57,43,0.1);
+        }
+        .shuffle-btn svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s;
+        }
+        .shuffle-btn:hover svg {
+            transform: rotate(180deg);
+        }
+
         .pagination {
             display: flex;
             gap: 0.5rem;
@@ -162,6 +193,16 @@
     </nav>
 
     <main>
+        <button class="shuffle-btn" onclick="window.location.reload()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 3 21 3 21 8"></polyline>
+                <line x1="4" y1="20" x2="21" y2="3"></line>
+                <polyline points="21 16 21 21 16 21"></polyline>
+                <line x1="15" y1="15" x2="21" y2="21"></line>
+                <line x1="4" y1="4" x2="9" y2="9"></line>
+            </svg>
+            Shuffle
+        </button>
         <div class="gallery-grid">
             {% for w in works %}
             <div class="gallery-item">
