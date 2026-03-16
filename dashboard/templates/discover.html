@@ -183,7 +183,7 @@
             <li>
                 <div class="signal-date">{{ s.signal_date }}</div>
                 <div class="signal-content">
-                    <a href="/artist/{{ s.artist_id }}" class="artist-link">{{ s.artist_name }}</a>
+                    <a href="/artist/{{ s.artist_slug or s.artist_id }}" class="artist-link">{{ s.artist_name }}</a>
                     <span class="signal-source">{{ s.source }}</span>
                     <div class="signal-detail">
                         {% if s.url %}
@@ -202,7 +202,7 @@
         <div class="artist-grid">
             {% for a in new_artists %}
             <div class="artist-card">
-                <h3><a href="/artist/{{ a.id }}">{{ a.name }}</a></h3>
+                <h3><a href="/artist/{{ a.slug or a.id }}">{{ a.name }}</a></h3>
                 <div class="meta">
                     {{ a.nationality or '' }}{% if a.birth_year %}, b. {{ a.birth_year }}{% endif %}
                     {% if a.medium %} &middot; <span class="tag">{{ a.medium }}</span>{% endif %}

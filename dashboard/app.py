@@ -8,7 +8,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 import plotly
 import plotly.graph_objects as go
 
@@ -86,7 +86,7 @@ def index():
         offset = (page - 1) * per_page
 
         artists = db.execute(f"""
-            SELECT a.id, a.name, a.nationality, a.birth_year, a.medium, a.tags,
+            SELECT a.id, a.name, a.slug, a.nationality, a.birth_year, a.medium, a.tags,
                    a.image_url, a.instagram_handle,
                    COUNT(ar.id) as sale_count,
                    ROUND(AVG(ar.hammer_price_usd), 0) as avg_price,
@@ -207,12 +207,23 @@ def _build_pagination_qs(sort, medium, price_min, price_max, search_q):
 
 
 @app.route("/artist/<int:artist_id>")
-def artist_detail(artist_id):
+def artist_detail_by_id(artist_id):
+    """Redirect old numeric URLs to slug-based URLs."""
+    with get_db() as db:
+        artist = db.execute("SELECT slug FROM artists WHERE id = ?", (artist_id,)).fetchone()
+        if not artist or not artist["slug"]:
+            return "Artist not found", 404
+    return redirect(url_for("artist_detail", slug=artist["slug"]), code=301)
+
+
+@app.route("/artist/<slug>")
+def artist_detail(slug):
     """Individual artist page with price chart."""
     with get_db() as db:
-        artist = db.execute("SELECT * FROM artists WHERE id = ?", (artist_id,)).fetchone()
+        artist = db.execute("SELECT * FROM artists WHERE slug = ?", (slug,)).fetchone()
         if not artist:
             return "Artist not found", 404
+        artist_id = artist["id"]
 
         results = db.execute("""
             SELECT * FROM auction_results
@@ -273,7 +284,7 @@ def discover():
     with get_db() as db:
         # Artists with recent first sales
         new_artists = db.execute("""
-            SELECT a.id, a.name, a.nationality, a.birth_year, a.medium, a.tags,
+            SELECT a.id, a.name, a.slug, a.nationality, a.birth_year, a.medium, a.tags,
                    a.first_seen_date,
                    COUNT(ar.id) as sale_count,
                    ROUND(AVG(ar.hammer_price_usd), 0) as avg_price
@@ -286,7 +297,7 @@ def discover():
 
         # Recent signals
         recent_signals = db.execute("""
-            SELECT ps.*, a.name as artist_name, a.id as artist_id
+            SELECT ps.*, a.name as artist_name, a.id as artist_id, a.slug as artist_slug
             FROM price_signals ps
             JOIN artists a ON a.id = ps.artist_id
             ORDER BY ps.signal_date DESC

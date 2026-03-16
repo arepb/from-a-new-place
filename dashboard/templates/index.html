@@ -495,7 +495,7 @@
                                 <div class="artist-thumb"></div>
                             {% endif %}
                             <div>
-                                <a href="/artist/{{ a.id }}" class="artist-name">{{ a.name }}</a>
+                                <a href="/artist/{{ a.slug or a.id }}" class="artist-name">{{ a.name }}</a>
                                 <div class="artist-meta">
                                     {{ a.nationality or '' }}{% if a.birth_year %}, b. {{ a.birth_year }}{% endif %}
                                     {% if a.medium %} &middot; <span class="tag">{{ a.medium }}</span>{% endif %}

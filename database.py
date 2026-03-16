@@ -47,6 +47,7 @@ def init_db(db_path=None):
                 instagram_handle TEXT,
                 image_url TEXT,
                 wikipedia_url TEXT,
+                slug TEXT,
                 created_at TEXT DEFAULT (datetime('now')),
                 updated_at TEXT DEFAULT (datetime('now')),
                 UNIQUE(name, birth_year)
