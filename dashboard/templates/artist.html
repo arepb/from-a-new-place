@@ -413,7 +413,7 @@
                     <td>
                         {% if r.image_url %}
                             {% if r.sale_url %}<a href="{{ r.sale_url }}" target="_blank">{% endif %}
-                            <img src="{{ r.image_url|upscale(240) }}" class="lot-thumb" alt="" loading="lazy">
+                            <img src="{{ r.image_url|upscale(400) }}" class="lot-thumb" alt="" loading="lazy">
                             {% if r.sale_url %}</a>{% endif %}
                         {% endif %}
                     </td>
