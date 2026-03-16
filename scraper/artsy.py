@@ -238,7 +238,17 @@ def _build_sale_url(artist_slug, internal_id, organization):
 
 
 def _parse_estimate(est_str):
-    """Parse estimate string like 'US$20,000–US$30,000' into (low, high)."""
+    """Parse estimate string like 'US$20,000–US$30,000' into (low, high) in USD.
+
+    Artsy's API returns hammer prices converted to USD (via centsUSD), but
+    estimates remain in their original currency with a display string like:
+      'US$20,000–US$30,000', '£30,000–£50,000', 'ZAR R100,000–R140,000',
+      'HK$400,000–HK$600,000', '€18,000–€20,000', 'CN¥1,000,000–CN¥2,000,000',
+      'JPY ¥5,000,000–¥8,000,000', 'S$10,000–S$20,000'
+
+    We convert all estimates to approximate USD using fixed exchange rates.
+    Rates are approximate — good enough for vs-estimate comparisons.
+    """
     if not est_str:
         return None, None
 
@@ -249,7 +259,8 @@ def _parse_estimate(est_str):
             low = float(numbers[0].replace(",", ""))
             high = float(numbers[1].replace(",", ""))
 
-            # Convert from other currencies if needed
+            # Convert from other currencies to USD
+            # Rates are approximate mid-market values (updated ~2025)
             if "£" in est_str or "GBP" in est_str:
                 low *= 1.27
                 high *= 1.27
@@ -260,8 +271,66 @@ def _parse_estimate(est_str):
                 low *= 1.13
                 high *= 1.13
             elif "HK$" in est_str or "HKD" in est_str:
-                low *= 0.13
-                high *= 0.13
+                low *= 0.128
+                high *= 0.128
+            elif "ZAR" in est_str:
+                low *= 0.054
+                high *= 0.054
+            elif "CN¥" in est_str or "CNY" in est_str or "RMB" in est_str:
+                low *= 0.138
+                high *= 0.138
+            elif "JPY" in est_str or ("¥" in est_str and "CN" not in est_str):
+                low *= 0.0067
+                high *= 0.0067
+            elif "S$" in est_str or "SGD" in est_str:
+                low *= 0.75
+                high *= 0.75
+            elif "A$" in est_str or "AUD" in est_str:
+                low *= 0.65
+                high *= 0.65
+            elif "CA$" in est_str or "CAD" in est_str:
+                low *= 0.73
+                high *= 0.73
+            elif "NZ$" in est_str or "NZD" in est_str:
+                low *= 0.60
+                high *= 0.60
+            elif "SEK" in est_str or "kr" in est_str:
+                low *= 0.096
+                high *= 0.096
+            elif "NOK" in est_str:
+                low *= 0.093
+                high *= 0.093
+            elif "DKK" in est_str:
+                low *= 0.146
+                high *= 0.146
+            elif "PLN" in est_str:
+                low *= 0.25
+                high *= 0.25
+            elif "INR" in est_str or "₹" in est_str:
+                low *= 0.012
+                high *= 0.012
+            elif "KRW" in est_str or "₩" in est_str:
+                low *= 0.00074
+                high *= 0.00074
+            elif "TWD" in est_str or "NT$" in est_str:
+                low *= 0.031
+                high *= 0.031
+            elif "MXN" in est_str:
+                low *= 0.058
+                high *= 0.058
+            elif "BRL" in est_str or "R$" in est_str:
+                low *= 0.18
+                high *= 0.18
+            elif "TRY" in est_str or "₺" in est_str:
+                low *= 0.031
+                high *= 0.031
+            elif "AED" in est_str:
+                low *= 0.272
+                high *= 0.272
+            elif "NGN" in est_str or "₦" in est_str:
+                low *= 0.00062
+                high *= 0.00062
+            # US$ or plain $ = already USD, no conversion needed
 
             return round(low, 2), round(high, 2)
         except ValueError:
