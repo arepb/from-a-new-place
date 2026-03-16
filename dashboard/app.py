@@ -4,6 +4,7 @@
 import sys
 import os
 import json
+import time
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -13,8 +14,23 @@ import plotly
 import plotly.graph_objects as go
 
 from database import get_db, init_db
+from scraper.signals import fetch_art_news
 
 app = Flask(__name__)
+
+# In-memory cache for art news RSS feeds
+_news_cache = {"data": [], "fetched_at": 0}
+_NEWS_CACHE_TTL = 900  # 15 minutes
+
+
+def _get_cached_news():
+    if time.time() - _news_cache["fetched_at"] > _NEWS_CACHE_TTL:
+        with get_db() as db:
+            artists = db.execute("SELECT name FROM artists").fetchall()
+        artist_names = [a["name"] for a in artists]
+        _news_cache["data"] = fetch_art_news(artist_names)
+        _news_cache["fetched_at"] = time.time()
+    return _news_cache["data"]
 
 
 @app.route("/")
@@ -332,19 +348,44 @@ def discover():
             LIMIT 50
         """).fetchall()
 
-        # Recent signals
-        recent_signals = db.execute("""
+        # Recent signals from DB
+        db_signals = db.execute("""
             SELECT ps.*, a.name as artist_name, a.id as artist_id, a.slug as artist_slug
             FROM price_signals ps
             JOIN artists a ON a.id = ps.artist_id
             ORDER BY ps.signal_date DESC
-            LIMIT 20
+            LIMIT 50
         """).fetchall()
+
+    # Merge DB signals + live RSS into one unified feed
+    news_items = _get_cached_news()
+    combined = []
+    for n in news_items:
+        combined.append({
+            "date": n["published_date"],
+            "source": n["source"],
+            "artist_name": n.get("artist_name", ""),
+            "title": n["title"],
+            "url": n["url"],
+            "summary": n.get("summary", ""),
+            "artist_slug": None,
+        })
+    for s in db_signals:
+        combined.append({
+            "date": s["signal_date"],
+            "source": s["source"],
+            "artist_name": s["artist_name"],
+            "title": s["details"][:200] if s["details"] else "",
+            "url": s["url"] or "",
+            "summary": "",
+            "artist_slug": s["artist_slug"] or s["artist_id"],
+        })
+    combined.sort(key=lambda x: x["date"] or "", reverse=True)
 
     return render_template(
         "discover.html",
         new_artists=new_artists,
-        recent_signals=recent_signals,
+        signals=combined[:40],
     )
 
 

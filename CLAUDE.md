@@ -32,7 +32,7 @@ Routes:
 ### Scraper (`scraper/`)
 - **artsy.py** — Primary source. GraphQL to `https://metaphysics-production.artsy.net/v2`. No auth needed. Fetches artist info + auction results with images.
 - **base.py** — Rate limiting, UA rotation, currency conversion (20+ currencies), price parsing.
-- **signals.py** — RSS monitoring of 9 publications: Artforum, Hyperallergic, ARTnews, The Art Newspaper, ArtDaily, Juxtapoz, NYT, Financial Times, The Guardian.
+- **signals.py** — RSS monitoring of 11 publications: Artforum, Hyperallergic, ARTnews, The Art Newspaper, ArtDaily, Juxtapoz, NYT, Financial Times, The Guardian, WSJ, Frieze. `scan_editorial_feeds()` for artist-specific mentions; `fetch_art_news()` for general headlines (used live on Signals page with 15-min cache).
 - **invaluable.py**, **heritage.py**, **liveauctioneers.py** — Secondary auction sources.
 - **discover.py** — Artist discovery from Artsy.
 

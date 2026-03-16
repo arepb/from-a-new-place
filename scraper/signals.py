@@ -6,6 +6,7 @@ These are non-price signals that often predict price movement:
 """
 
 import re
+import html
 import logging
 from datetime import datetime
 
@@ -26,6 +27,8 @@ DEFAULT_FEEDS = [
     {"name": "NYT", "url": "https://rss.nytimes.com/services/xml/rss/nyt/ArtandDesign.xml"},
     {"name": "Financial Times", "url": "https://www.ft.com/arts?format=rss"},
     {"name": "The Guardian", "url": "https://www.theguardian.com/artanddesign/rss"},
+    {"name": "WSJ", "url": "https://feeds.content.dowjones.io/public/rss/RSSArtsCulture"},
+    {"name": "Frieze", "url": "https://www.frieze.com/feed"},
 ]
 
 
@@ -117,6 +120,60 @@ def _parse_feed_date(entry):
             pass
 
     return datetime.now().strftime("%Y-%m-%d")
+
+
+def fetch_art_news(artist_names, feeds=None, limit=30):
+    """
+    Fetch recent headlines from RSS feeds that mention tracked artists.
+
+    Args:
+        artist_names: list of artist name strings to match against
+        feeds: list of dicts with 'name' and 'url' keys
+        limit: max items to return
+
+    Returns list of dicts sorted by date: {title, url, source, published_date, summary, artist_name}
+    """
+    feeds = feeds or DEFAULT_FEEDS
+    items = []
+
+    # Build lookup using full names for accuracy (last-name-only matching
+    # produces too many false positives: "Hall", "Wood", "Ye", etc.)
+    name_list = [(name, name.strip().lower()) for name in artist_names if name.strip()]
+
+    for feed_info in feeds:
+        try:
+            feed = feedparser.parse(feed_info["url"])
+            for entry in feed.entries[:15]:
+                title = entry.get("title", "").strip()
+                if not title:
+                    continue
+                summary_raw = entry.get("summary", entry.get("description", ""))
+                summary_clean = re.sub(r"<[^>]+>", "", summary_raw)
+                summary_clean = html.unescape(summary_clean).strip()
+                text = f"{title} {summary_clean}".lower()
+
+                # Check if any tracked artist's full name appears
+                matched_artist = None
+                for full_name, full_lower in name_list:
+                    if full_lower in text:
+                        matched_artist = full_name
+                        break
+
+                if matched_artist:
+                    items.append({
+                        "title": title,
+                        "url": entry.get("link", ""),
+                        "source": feed_info["name"],
+                        "published_date": _parse_feed_date(entry),
+                        "summary": summary_clean[:200],
+                        "artist_name": matched_artist,
+                    })
+        except Exception as e:
+            logger.warning(f"Failed to fetch news from {feed_info['name']}: {e}")
+
+    # Sort by date descending
+    items.sort(key=lambda x: x["published_date"], reverse=True)
+    return items[:limit]
 
 
 def check_google_trends(artist_names, timeframe="today 3-m"):

@@ -177,22 +177,29 @@
     </nav>
 
     <main>
-        {% if recent_signals %}
+        {% if signals %}
         <h3 class="section-title">Recent Signals</h3>
         <ul class="signal-feed">
-            {% for s in recent_signals %}
+            {% for s in signals %}
             <li>
-                <div class="signal-date">{{ s.signal_date }}</div>
+                <div class="signal-date">{{ s.date }}</div>
                 <div class="signal-content">
-                    <a href="/artist/{{ s.artist_slug or s.artist_id }}" class="artist-link">{{ s.artist_name }}</a>
                     <span class="signal-source">{{ s.source }}</span>
-                    <div class="signal-detail">
+                    {% if s.artist_slug %}
+                        <a href="/artist/{{ s.artist_slug }}" class="artist-link" style="margin-left: 0.5rem;">{{ s.artist_name }}</a>
+                    {% elif s.artist_name %}
+                        <span style="font-weight: 700; color: #000; margin-left: 0.5rem;">{{ s.artist_name }}</span>
+                    {% endif %}
+                    <div style="margin-top: 0.25rem;">
                         {% if s.url %}
-                            <a href="{{ s.url }}" target="_blank" style="color: #888;">{{ s.details[:100] }}</a>
+                            <a href="{{ s.url }}" target="_blank" style="color: #1a1a1a; font-weight: 600;">{{ s.title }}</a>
                         {% else %}
-                            {{ s.details[:100] }}
+                            <span style="font-weight: 600;">{{ s.title }}</span>
                         {% endif %}
                     </div>
+                    {% if s.summary %}
+                    <div class="signal-detail">{{ s.summary[:120] }}{% if s.summary|length > 120 %}&hellip;{% endif %}</div>
+                    {% endif %}
                 </div>
             </li>
             {% endfor %}
