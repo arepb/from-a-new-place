@@ -15,11 +15,17 @@ logger = logging.getLogger(__name__)
 
 # Major art publications RSS feeds
 DEFAULT_FEEDS = [
+    # Art-specific publications
     {"name": "Artforum", "url": "https://www.artforum.com/rss"},
     {"name": "Hyperallergic", "url": "https://hyperallergic.com/feed/"},
-    {"name": "Frieze", "url": "https://www.frieze.com/rss"},
     {"name": "ARTnews", "url": "https://www.artnews.com/feed/"},
-    {"name": "The Art Newspaper", "url": "https://www.theartnewspaper.com/rss"},
+    {"name": "The Art Newspaper", "url": "https://www.theartnewspaper.com/rss.xml"},
+    {"name": "ArtDaily", "url": "https://artdaily.com/rss.asp"},
+    {"name": "Juxtapoz", "url": "https://www.juxtapoz.com/rss/"},
+    # Major newspapers — arts sections
+    {"name": "NYT", "url": "https://rss.nytimes.com/services/xml/rss/nyt/ArtandDesign.xml"},
+    {"name": "Financial Times", "url": "https://www.ft.com/arts?format=rss"},
+    {"name": "The Guardian", "url": "https://www.theguardian.com/artanddesign/rss"},
 ]
 
 
