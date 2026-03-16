@@ -489,9 +489,9 @@
                     <td>
                         <div class="artist-cell">
                             {% if a.artwork_thumb %}
-                                <img src="{{ a.artwork_thumb }}" class="artist-thumb" alt="" loading="lazy">
+                                <img src="{{ a.artwork_thumb|upscale(120) }}" class="artist-thumb" alt="" loading="lazy">
                             {% elif a.image_url %}
-                                <img src="{{ a.image_url }}" class="artist-thumb" alt="" loading="lazy">
+                                <img src="{{ a.image_url|upscale(120) }}" class="artist-thumb" alt="" loading="lazy">
                             {% else %}
                                 <div class="artist-thumb"></div>
                             {% endif %}

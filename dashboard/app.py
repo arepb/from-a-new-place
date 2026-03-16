@@ -18,6 +18,21 @@ from scraper.signals import fetch_art_news
 
 app = Flask(__name__)
 
+
+def _upscale_artsy_url(url, size=300):
+    """Upscale Artsy CDN thumbnail URLs to requested size and quality."""
+    if not url or 'd7hftxdivxxvm.cloudfront.net' not in url:
+        return url
+    import re
+    url = re.sub(r'height=\d+', f'height={size}', url)
+    url = re.sub(r'width=\d+', f'width={size}', url)
+    url = re.sub(r'quality=\d+', 'quality=95', url)
+    url = url.replace('thumbnail.jpg', 'larger.jpg')
+    return url
+
+
+app.jinja_env.filters['upscale'] = _upscale_artsy_url
+
 # In-memory cache for art news RSS feeds
 _news_cache = {"data": [], "fetched_at": 0}
 _NEWS_CACHE_TTL = 900  # 15 minutes
