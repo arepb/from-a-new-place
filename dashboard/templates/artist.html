@@ -385,7 +385,9 @@
                 <tr>
                     <td>
                         {% if r.image_url %}
+                            {% if r.sale_url %}<a href="{{ r.sale_url }}" target="_blank">{% endif %}
                             <img src="{{ r.image_url }}" class="lot-thumb" alt="" loading="lazy">
+                            {% if r.sale_url %}</a>{% endif %}
                         {% endif %}
                     </td>
                     <td>{{ r.sale_date or '—' }}</td>
