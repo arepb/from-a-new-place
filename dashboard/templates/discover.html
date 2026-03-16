@@ -14,43 +14,45 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: #141218;
-            color: #e0e0e0;
+            background: #fff4f4;
+            color: #1a1a1a;
             line-height: 1.6;
         }
-        a { color: #e74c3c; text-decoration: none; }
+        a { color: #c0392b; text-decoration: none; }
         a:hover { text-decoration: underline; }
 
         header {
             padding: 2rem 3rem 1rem;
-            border-bottom: 1px solid #231f2e;
+            border-bottom: 2px solid #1a1a1a;
         }
         header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
+            font-size: 2rem;
+            font-weight: 900;
             letter-spacing: -0.03em;
-            color: #fff;
+            color: #000;
+            text-transform: uppercase;
         }
-        header h1 span { color: #e74c3c; }
-        header p { color: #666; font-size: 0.85rem; margin-top: 0.25rem; }
+        header h1 span { color: #c0392b; }
+        header p { color: #777; font-size: 0.85rem; margin-top: 0.25rem; }
 
         nav {
             display: flex;
             gap: 2rem;
             padding: 1rem 3rem;
-            border-bottom: 1px solid #231f2e;
+            border-bottom: 1px solid #e0d5d5;
             font-size: 0.85rem;
         }
-        nav a { color: #888; font-weight: 500; }
-        nav a.active { color: #fff; border-bottom: 2px solid #e74c3c; padding-bottom: 0.5rem; }
+        nav a { color: #999; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+        nav a.active { color: #000; border-bottom: 3px solid #c0392b; padding-bottom: 0.5rem; }
 
         main { padding: 2rem 3rem 3rem; max-width: 1200px; }
 
         .section-title {
             font-size: 0.85rem;
-            color: #666;
+            color: #000;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            font-weight: 800;
             margin-bottom: 1rem;
         }
 
@@ -62,22 +64,22 @@
         }
 
         .artist-card {
-            background: #1a1720;
-            border: 1px solid #231f2e;
+            background: #fff;
+            border: 1px solid #e0d5d5;
             border-radius: 8px;
             padding: 1.25rem;
             transition: border-color 0.2s;
         }
-        .artist-card:hover { border-color: #333; }
+        .artist-card:hover { border-color: #c0392b; }
         .artist-card h3 {
             font-size: 1rem;
-            font-weight: 600;
-            color: #fff;
+            font-weight: 700;
+            color: #000;
             margin-bottom: 0.25rem;
         }
         .artist-card .meta {
             font-size: 0.8rem;
-            color: #555;
+            color: #888;
             margin-bottom: 0.75rem;
         }
         .artist-card .stats {
@@ -85,50 +87,50 @@
             gap: 1.5rem;
             font-size: 0.8rem;
         }
-        .artist-card .stat-label { color: #444; }
-        .artist-card .stat-value { color: #999; font-weight: 600; }
+        .artist-card .stat-label { color: #999; }
+        .artist-card .stat-value { color: #1a1a1a; font-weight: 600; }
         .tag {
             display: inline-block;
             padding: 0.1rem 0.4rem;
-            background: #231f2e;
+            background: #f0e6e6;
             border-radius: 3px;
             font-size: 0.7rem;
-            color: #666;
+            color: #777;
             margin-right: 0.25rem;
         }
-        .no-data { color: #333; }
+        .no-data { color: #ccc; }
 
         .signal-feed {
             list-style: none;
         }
         .signal-feed li {
             padding: 1rem 0;
-            border-bottom: 1px solid #1e1b25;
+            border-bottom: 1px solid #e8dede;
             display: flex;
             gap: 1rem;
             align-items: flex-start;
         }
         .signal-date {
-            color: #333;
+            color: #bbb;
             font-size: 0.75rem;
             min-width: 80px;
             flex-shrink: 0;
         }
         .signal-content { flex: 1; }
         .signal-content .artist-link {
-            font-weight: 600;
-            color: #fff;
+            font-weight: 700;
+            color: #000;
         }
         .signal-source {
             display: inline-block;
             padding: 0.1rem 0.4rem;
-            background: #231f2e;
+            background: #f0e6e6;
             border-radius: 3px;
             font-size: 0.7rem;
-            color: #888;
+            color: #777;
         }
         .signal-detail {
-            color: #666;
+            color: #888;
             font-size: 0.85rem;
             margin-top: 0.25rem;
         }
@@ -185,7 +187,7 @@
                     <span class="signal-source">{{ s.source }}</span>
                     <div class="signal-detail">
                         {% if s.url %}
-                            <a href="{{ s.url }}" target="_blank" style="color: #999;">{{ s.details[:100] }}</a>
+                            <a href="{{ s.url }}" target="_blank" style="color: #888;">{{ s.details[:100] }}</a>
                         {% else %}
                             {{ s.details[:100] }}
                         {% endif %}

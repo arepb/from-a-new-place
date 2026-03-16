@@ -15,15 +15,17 @@ OUT_PATH = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "dashboard", "static", "og-image.png"
 )
 
-# Colors matching the site's new dark grey-purple palette
-BG = (20, 18, 24)          # #141218
-SURFACE = (26, 23, 32)     # #1a1720
-BORDER = (35, 31, 46)      # #231f2e
-ACCENT = (231, 76, 60)     # #e74c3c
-TEXT = (224, 224, 224)      # #e0e0e0
-TEXT_DIM = (140, 135, 150)  # muted
-TEXT_GREEN = (46, 204, 113) # green for positive
+# Colors matching the new pinkish/Colby Museum-inspired palette
+BG = (255, 244, 244)          # #fff4f4
+SURFACE = (255, 255, 255)     # #fff
+BORDER = (224, 213, 213)      # #e0d5d5
+ACCENT = (192, 57, 43)        # #c0392b
+TEXT = (26, 26, 26)            # #1a1a1a
+TEXT_DIM = (153, 153, 153)     # #999
+TEXT_GREEN = (30, 132, 73)     # #1e8449
+BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+TAG_BG = (240, 230, 230)      # #f0e6e6
 
 W, H = 1200, 630
 
@@ -102,15 +104,15 @@ def generate():
 
     # === HEADER ===
     # Title
-    draw.text((40, 30), "From A ", fill=WHITE, font=font_title)
-    title_w = draw.textlength("From A ", font=font_title)
-    draw.text((40 + title_w, 30), "New Place", fill=ACCENT, font=font_title)
+    draw.text((40, 30), "FROM A ", fill=BLACK, font=font_title)
+    title_w = draw.textlength("FROM A ", font=font_title)
+    draw.text((40 + title_w, 30), "NEW PLACE", fill=ACCENT, font=font_title)
 
     # Subtitle
     draw.text((40, 78), "Emerging artist price tracker — ranked by Heat Index", fill=TEXT_DIM, font=font_subtitle)
 
-    # Header line
-    draw.line([(40, 108), (W - 40, 108)], fill=BORDER, width=1)
+    # Header line (bold black like the site)
+    draw.line([(40, 108), (W - 40, 108)], fill=BLACK, width=2)
 
     # === STATS ROW ===
     stats_y = 120
@@ -122,20 +124,20 @@ def generate():
     stat_x = 40
     for label, value in stats:
         draw.text((stat_x, stats_y), label, fill=TEXT_DIM, font=font_label)
-        draw.text((stat_x + 2, stats_y + 16), value, fill=WHITE, font=font_stat)
+        draw.text((stat_x + 2, stats_y + 16), value, fill=BLACK, font=font_stat)
         stat_x += 200
 
     # === LEFT SIDE: LEADERBOARD ===
     table_y = 170
-    draw.line([(40, table_y), (640, table_y)], fill=BORDER, width=1)
+    draw.line([(40, table_y), (640, table_y)], fill=BLACK, width=2)
 
     # Column headers
     header_y = table_y + 6
-    draw.text((40, header_y), "#", fill=TEXT_DIM, font=font_label)
-    draw.text((65, header_y), "ARTIST", fill=TEXT_DIM, font=font_label)
-    draw.text((330, header_y), "PALETTE", fill=TEXT_DIM, font=font_label)
-    draw.text((500, header_y), "HEAT", fill=TEXT_DIM, font=font_label)
-    draw.text((560, header_y), "TREND", fill=TEXT_DIM, font=font_label)
+    draw.text((40, header_y), "#", fill=BLACK, font=font_label)
+    draw.text((65, header_y), "ARTIST", fill=BLACK, font=font_label)
+    draw.text((330, header_y), "PALETTE", fill=BLACK, font=font_label)
+    draw.text((500, header_y), "HEAT", fill=BLACK, font=font_label)
+    draw.text((560, header_y), "TREND", fill=BLACK, font=font_label)
 
     draw.line([(40, header_y + 20), (640, header_y + 20)], fill=BORDER, width=1)
 
@@ -148,7 +150,7 @@ def generate():
         if i % 2 == 1:
             draw.rectangle(
                 [(38, row_y - 2), (642, row_y + row_h - 6)],
-                fill=(22, 20, 28),
+                fill=(252, 238, 237),  # #fceeed
             )
 
         # Rank number
@@ -158,7 +160,7 @@ def generate():
         name = a["name"]
         if len(name) > 25:
             name = name[:23] + "…"
-        draw.text((65, row_y + 2), name, fill=WHITE, font=font_row_name)
+        draw.text((65, row_y + 2), name, fill=BLACK, font=font_row_name)
 
         # Bio line
         bio_parts = []
@@ -177,6 +179,7 @@ def generate():
             draw.ellipse(
                 [(dot_x, row_y + 10), (dot_x + 16, row_y + 26)],
                 fill=rgb,
+                outline=(200, 190, 190),
             )
             dot_x += 22
 
@@ -186,13 +189,16 @@ def generate():
         pill_w = 44
         pill_h = 24
         pill_y = row_y + 6
-        # Pill color intensity based on heat
-        intensity = min(heat / 80, 1.0)
-        pill_color = (
-            int(ACCENT[0] * intensity + SURFACE[0] * (1 - intensity)),
-            int(ACCENT[1] * intensity + SURFACE[1] * (1 - intensity)),
-            int(ACCENT[2] * intensity + SURFACE[2] * (1 - intensity)),
-        )
+        # Solid red pill for hot artists
+        if heat >= 60:
+            pill_color = ACCENT
+            pill_text = WHITE
+        elif heat >= 30:
+            pill_color = (243, 156, 18)  # warm orange
+            pill_text = WHITE
+        else:
+            pill_color = TAG_BG
+            pill_text = TEXT_DIM
         draw.rounded_rectangle(
             [(pill_x, pill_y), (pill_x + pill_w, pill_y + pill_h)],
             radius=12,
@@ -203,7 +209,7 @@ def generate():
         draw.text(
             (pill_x + (pill_w - tw) / 2, pill_y + 4),
             heat_text,
-            fill=WHITE,
+            fill=pill_text,
             font=font_heat,
         )
 
@@ -233,13 +239,13 @@ def generate():
     draw.text(
         (chart_x + 20, chart_y + 12),
         "AVERAGE SALE PRICE",
-        fill=TEXT_DIM,
+        fill=BLACK,
         font=font_label,
     )
     draw.text(
         (chart_x + 20, chart_y + 28),
         "Monthly trend across all tracked artists",
-        fill=(100, 95, 110),
+        fill=TEXT_DIM,
         font=font_chart_label,
     )
 
@@ -276,20 +282,14 @@ def generate():
             py = plot_y + plot_h - int(plot_h * (d["avg_price"] - min_price) / price_range)
             points.append((px, py))
 
-        # Filled area under curve (gradient effect)
+        # Filled area under curve
         if len(points) >= 2:
-            # Create polygon for fill
-            fill_points = list(points) + [
-                (points[-1][0], plot_y + plot_h),
-                (points[0][0], plot_y + plot_h),
-            ]
-            # Semi-transparent fill - draw multiple fading layers
             for offset in range(0, 60, 2):
                 alpha_pct = 1.0 - (offset / 60)
                 fill_color = (
-                    int(ACCENT[0] * 0.3 * alpha_pct + BG[0] * (1 - 0.3 * alpha_pct)),
-                    int(ACCENT[1] * 0.3 * alpha_pct + BG[1] * (1 - 0.3 * alpha_pct)),
-                    int(ACCENT[2] * 0.3 * alpha_pct + BG[2] * (1 - 0.3 * alpha_pct)),
+                    int(ACCENT[0] * 0.2 * alpha_pct + SURFACE[0] * (1 - 0.2 * alpha_pct)),
+                    int(ACCENT[1] * 0.2 * alpha_pct + SURFACE[1] * (1 - 0.2 * alpha_pct)),
+                    int(ACCENT[2] * 0.2 * alpha_pct + SURFACE[2] * (1 - 0.2 * alpha_pct)),
                 )
                 shifted_points = [(x, min(y + offset, plot_y + plot_h)) for x, y in points]
                 shifted_fill = list(shifted_points) + [

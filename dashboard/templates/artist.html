@@ -18,60 +18,62 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: #141218;
-            color: #e0e0e0;
+            background: #fff4f4;
+            color: #1a1a1a;
             line-height: 1.6;
         }
-        a { color: #e74c3c; text-decoration: none; }
+        a { color: #c0392b; text-decoration: none; }
         a:hover { text-decoration: underline; }
 
         header {
             padding: 2rem 3rem 1rem;
-            border-bottom: 1px solid #231f2e;
+            border-bottom: 2px solid #1a1a1a;
         }
         header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
+            font-size: 2rem;
+            font-weight: 900;
             letter-spacing: -0.03em;
-            color: #fff;
+            color: #000;
+            text-transform: uppercase;
         }
-        header h1 span { color: #e74c3c; }
-        header p { color: #666; font-size: 0.85rem; margin-top: 0.25rem; }
+        header h1 span { color: #c0392b; }
+        header p { color: #777; font-size: 0.85rem; margin-top: 0.25rem; }
 
         nav {
             display: flex;
             gap: 2rem;
             padding: 1rem 3rem;
-            border-bottom: 1px solid #231f2e;
+            border-bottom: 1px solid #e0d5d5;
             font-size: 0.85rem;
         }
-        nav a { color: #888; font-weight: 500; }
+        nav a { color: #999; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
 
         main { padding: 2rem 3rem 3rem; max-width: 1200px; }
 
-        .back { color: #555; font-size: 0.85rem; margin-bottom: 1.5rem; display: block; }
+        .back { color: #999; font-size: 0.85rem; margin-bottom: 1.5rem; display: block; }
 
         .artist-header {
             margin-bottom: 2rem;
         }
         .artist-header h2 {
             font-size: 2rem;
-            font-weight: 700;
-            color: #fff;
+            font-weight: 900;
+            color: #000;
             letter-spacing: -0.03em;
+            text-transform: uppercase;
         }
         .artist-header .meta {
-            color: #666;
+            color: #888;
             font-size: 0.9rem;
             margin-top: 0.25rem;
         }
         .tag {
             display: inline-block;
             padding: 0.15rem 0.5rem;
-            background: #231f2e;
+            background: #f0e6e6;
             border-radius: 3px;
             font-size: 0.75rem;
-            color: #666;
+            color: #777;
             margin-right: 0.25rem;
         }
 
@@ -82,8 +84,8 @@
             margin-bottom: 2rem;
         }
         .score-card {
-            background: #1a1720;
-            border: 1px solid #231f2e;
+            background: #fff;
+            border: 1px solid #e0d5d5;
             border-radius: 8px;
             padding: 1rem;
         }
@@ -91,37 +93,39 @@
             font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #555;
+            color: #999;
         }
         .score-card .value {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #fff;
+            color: #000;
             margin-top: 0.25rem;
         }
-        .score-card .value.hot { color: #e74c3c; }
-        .score-card .value.warm { color: #f39c12; }
+        .score-card .value.hot { color: #c0392b; }
+        .score-card .value.warm { color: #d68910; }
 
         .chart-container {
-            background: #1a1720;
-            border: 1px solid #231f2e;
+            background: #fff;
+            border: 1px solid #e0d5d5;
             border-radius: 8px;
             padding: 1.5rem;
             margin-bottom: 2rem;
         }
         .chart-container h3 {
             font-size: 0.85rem;
-            color: #666;
+            color: #000;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            font-weight: 800;
             margin-bottom: 1rem;
         }
 
         .section-title {
             font-size: 0.85rem;
-            color: #666;
+            color: #000;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            font-weight: 800;
             margin-bottom: 1rem;
             margin-top: 2rem;
         }
@@ -134,51 +138,51 @@
         th {
             text-align: left;
             padding: 0.6rem 0.75rem;
-            border-bottom: 2px solid #2a2636;
-            color: #555;
-            font-weight: 600;
+            border-bottom: 2px solid #1a1a1a;
+            color: #000;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             font-size: 0.7rem;
         }
         td {
             padding: 0.6rem 0.75rem;
-            border-bottom: 1px solid #1e1b25;
+            border-bottom: 1px solid #e8dede;
         }
-        tr:hover td { background: #0f0f0f; }
+        tr:hover td { background: #fceeed; }
 
-        .beat { color: #27ae60; }
-        .miss { color: #e74c3c; }
+        .beat { color: #1e8449; }
+        .miss { color: #c0392b; }
 
         .signal-list { list-style: none; }
         .signal-list li {
             padding: 0.75rem 0;
-            border-bottom: 1px solid #1e1b25;
+            border-bottom: 1px solid #e8dede;
             font-size: 0.85rem;
         }
-        .signal-date { color: #555; font-size: 0.75rem; }
+        .signal-date { color: #999; font-size: 0.75rem; }
         .ig-link {
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            background: #231f2e;
-            border: 1px solid #333;
+            background: #fff;
+            border: 1px solid #d0c5c5;
             border-radius: 6px;
             padding: 0.3rem 0.7rem;
             font-size: 0.8rem;
-            color: #e0e0e0;
+            color: #1a1a1a;
             margin-top: 0.5rem;
             transition: border-color 0.2s;
         }
-        .ig-link:hover { border-color: #e74c3c; text-decoration: none; }
-        .ig-link svg { width: 16px; height: 16px; fill: #e0e0e0; }
+        .ig-link:hover { border-color: #c0392b; text-decoration: none; }
+        .ig-link svg { width: 16px; height: 16px; fill: #1a1a1a; }
 
         .lot-thumb {
             width: 120px;
             height: 120px;
             border-radius: 3px;
             object-fit: cover;
-            background: #231f2e;
+            background: #f0e6e6;
         }
 
         .palette-bar {
@@ -187,7 +191,7 @@
             border-radius: 4px;
             overflow: hidden;
             margin-top: 8px;
-            border: 1px solid #2a2636;
+            border: 1px solid #e0d5d5;
         }
         .palette-segment {
             transition: opacity 0.2s;
@@ -205,17 +209,17 @@
         }
         .palette-hex span {
             font-size: 0.65rem;
-            color: #666;
+            color: #888;
             font-family: monospace;
         }
 
         .signal-source {
             display: inline-block;
             padding: 0.1rem 0.4rem;
-            background: #231f2e;
+            background: #f0e6e6;
             border-radius: 3px;
             font-size: 0.7rem;
-            color: #888;
+            color: #777;
         }
 
         /* Mobile responsive */
@@ -296,7 +300,7 @@
                 </a>
                 {% endif %}
                 {% if artist.wikipedia_url %}
-                <a href="{{ artist.wikipedia_url }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.3rem; color: #888; font-size: 0.85rem;">
+                <a href="{{ artist.wikipedia_url }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.3rem; color: #777; font-size: 0.85rem;">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12.09 13.119c-.936 1.932-2.217 4.548-2.853 5.728-.616 1.074-1.127.931-1.532.029-1.406-3.321-4.293-9.144-5.651-12.409-.251-.601-.441-.987-.619-1.139-.181-.15-.554-.24-1.122-.271C.103 5.033 0 4.982 0 4.898v-.455l.052-.045c.924-.005 5.401 0 5.401 0l.051.045v.434c0 .119-.075.176-.225.176l-.564.031c-.485.029-.727.164-.727.407 0 .2.122.643.366 1.329l3.957 9.262 1.891-4.118L8.685 8.85c-.539-1.16-.854-1.809-.948-1.948-.135-.18-.394-.271-.779-.271h-.281c-.161 0-.241-.055-.241-.164v-.476l.049-.045h4.827l.05.045v.476c0 .109-.08.164-.241.164h-.179c-.549 0-.824.142-.824.427 0 .12.062.324.189.614l2.112 4.495 1.86-3.861c.145-.312.217-.596.217-.852 0-.493-.297-.74-.891-.74h-.297c-.161 0-.241-.055-.241-.164v-.476L13.7 6.3h3.752l.05.045v.476c0 .109-.08.162-.241.162-.587.015-1.018.166-1.297.452-.279.287-.684 1.022-1.211 2.209l-2.538 5.474 2.084 4.538c.526 1.059.967 1.569 1.322 1.569.262 0 .521-.27.777-.812l4.789-10.165c.259-.556.387-.929.387-1.122 0-.292-.262-.444-.787-.456h-.392c-.161 0-.241-.055-.241-.164v-.476l.049-.045h4.894l.05.045v.476c0 .109-.08.164-.24.164-.902 0-1.629.669-2.183 2.005L16.887 18.86c-.543 1.187-1.058 1.487-1.546.896-.478-.595-1.718-3.043-3.718-7.342-.32-.674-1.122-2.369-2.423-5.095-.349-.722-.68-1.103-.992-1.143l-.558-.044c-.161 0-.241-.055-.241-.164v-.476l.049-.045h5.382l.05.045v.476c0 .109-.08.164-.241.164h-.228c-.559 0-.838.196-.838.588 0 .123.038.27.116.445l3.577 7.909z"/></svg>
                     Wikipedia
                 </a>
@@ -388,7 +392,7 @@
                     <td>{{ r.auction_house or '—' }}</td>
                     <td>
                         {% if r.sale_url %}
-                            <a href="{{ r.sale_url }}" target="_blank" style="color: #e74c3c;">{{ (r.title or 'Untitled')[:40] }}</a>
+                            <a href="{{ r.sale_url }}" target="_blank">{{ (r.title or 'Untitled')[:40] }}</a>
                         {% else %}
                             {{ (r.title or 'Untitled')[:40] }}
                         {% endif %}
@@ -423,7 +427,7 @@
                 <span class="signal-date">{{ s.signal_date }}</span>
                 <span class="signal-source">{{ s.source }}</span>
                 {% if s.url %}
-                    <a href="{{ s.url }}" target="_blank" style="color: #999;">{{ s.details[:80] }}</a>
+                    <a href="{{ s.url }}" target="_blank" style="color: #777;">{{ s.details[:80] }}</a>
                 {% else %}
                     {{ s.details[:80] }}
                 {% endif %}
@@ -436,12 +440,12 @@
     {% if chart_json %}
     <script>
         const chartData = {{ chart_json|safe }};
-        // Apply dark theme
-        chartData.layout.paper_bgcolor = '#1a1720';
-        chartData.layout.plot_bgcolor = '#1a1720';
-        chartData.layout.font = { color: '#888', family: 'Inter, system-ui, sans-serif' };
-        chartData.layout.xaxis = { ...chartData.layout.xaxis, gridcolor: '#231f2e', linecolor: '#2a2636' };
-        chartData.layout.yaxis = { ...chartData.layout.yaxis, gridcolor: '#231f2e', linecolor: '#2a2636' };
+        // Apply light theme
+        chartData.layout.paper_bgcolor = '#fff';
+        chartData.layout.plot_bgcolor = '#fff';
+        chartData.layout.font = { color: '#555', family: 'Inter, system-ui, sans-serif' };
+        chartData.layout.xaxis = { ...chartData.layout.xaxis, gridcolor: '#f0e6e6', linecolor: '#e0d5d5' };
+        chartData.layout.yaxis = { ...chartData.layout.yaxis, gridcolor: '#f0e6e6', linecolor: '#e0d5d5' };
         Plotly.newPlot('price-chart', chartData.data, chartData.layout, { displayModeBar: false, responsive: true });
     </script>
     {% endif %}
