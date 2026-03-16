@@ -326,7 +326,7 @@ def gallery():
         page = max(1, min(page, total_pages))
         offset = (page - 1) * per_page
 
-        # Get works with images, randomized but paginated
+        # Get works with images, randomized order
         works = db.execute(f"""
             SELECT ar.title, ar.sale_url, ar.image_url, ar.hammer_price_usd,
                    ar.sale_date, ar.auction_house,
@@ -334,8 +334,8 @@ def gallery():
             FROM auction_results ar
             JOIN artists a ON a.id = ar.artist_id
             WHERE ar.image_url IS NOT NULL AND ar.image_url != '' AND ar.sold = 1
-            ORDER BY ar.sale_date DESC
-            LIMIT {per_page} OFFSET {offset}
+            ORDER BY RANDOM()
+            LIMIT {per_page}
         """).fetchall()
 
     return render_template(
