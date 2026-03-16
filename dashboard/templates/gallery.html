@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://d7hftxdivxxvm.cloudfront.net">
     <title>Gallery — Emerging Art Auction Works | From A New Place</title>
     <meta name="description" content="Browse emerging art auction works visually. Thumbnails of recent auction lots from contemporary and emerging artists tracked by From A New Place.">
     <link rel="canonical" href="https://fromanewplace.com/gallery">
@@ -208,7 +209,7 @@
             <div class="gallery-item">
                 <a href="{{ w.sale_url or '#' }}" target="_blank" class="thumb-link">
                     <img src="{{ w.image_url|upscale(600) }}"
-                         alt="{{ w.title or 'Untitled' }}" loading="lazy">
+                         alt="{{ w.title or 'Untitled' }}" loading="lazy" decoding="async">
                 </a>
                 <div class="work-title">{{ (w.title or 'Untitled')[:50] }}</div>
                 <a href="/artist/{{ w.artist_slug }}" class="artist-link">{{ w.artist_name }}</a>

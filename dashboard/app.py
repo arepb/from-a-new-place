@@ -19,6 +19,24 @@ from scraper.signals import fetch_art_news
 app = Flask(__name__)
 
 
+@app.after_request
+def set_cache_headers(response):
+    """Set HTTP cache headers for better performance."""
+    path = request.path
+    if path.startswith("/static/"):
+        # Static assets: cache aggressively (1 year, immutable)
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    elif path == "/sitemap.xml" or path == "/robots.txt" or path == "/llms.txt":
+        response.headers["Cache-Control"] = "public, max-age=86400"  # 1 day
+    elif path == "/gallery":
+        # Gallery is randomized, don't cache
+        response.headers["Cache-Control"] = "no-cache"
+    elif response.status_code == 200 and response.content_type.startswith("text/html"):
+        # HTML pages: short cache (5 min) — data updates biweekly
+        response.headers["Cache-Control"] = "public, max-age=300"
+    return response
+
+
 def _upscale_artsy_url(url, size=300):
     """Upscale Artsy CDN thumbnail URLs to requested size and quality."""
     if not url or 'd7hftxdivxxvm.cloudfront.net' not in url:
@@ -36,6 +54,10 @@ app.jinja_env.filters['upscale'] = _upscale_artsy_url
 # In-memory cache for art news RSS feeds
 _news_cache = {"data": [], "fetched_at": 0}
 _NEWS_CACHE_TTL = 900  # 15 minutes
+
+# In-memory cache for dashboard stats (artists, results, signals counts)
+_stats_cache = {"data": {}, "fetched_at": 0}
+_STATS_CACHE_TTL = 3600  # 1 hour
 
 
 def _get_cached_news():
@@ -139,20 +161,10 @@ def index():
                       AND ar3.hammer_price_usd IS NOT NULL) as avg_vs_estimate
             FROM artists a
             JOIN auction_results ar ON ar.artist_id = a.id
-            LEFT JOIN (
-                SELECT artist_id, composite_score, sell_through_rate, estimate_beat_rate
-                FROM trend_scores
-                WHERE id IN (SELECT MAX(id) FROM trend_scores GROUP BY artist_id)
-            ) ts ON ts.artist_id = a.id
-            LEFT JOIN (
-                SELECT artist_id, composite_score
-                FROM trend_scores
-                WHERE id IN (
-                    SELECT MAX(id) FROM trend_scores
-                    WHERE id NOT IN (SELECT MAX(id) FROM trend_scores GROUP BY artist_id)
-                    GROUP BY artist_id
-                )
-            ) ts_prev ON ts_prev.artist_id = a.id
+            LEFT JOIN trend_scores ts ON ts.artist_id = a.id
+                AND ts.id = (SELECT MAX(id) FROM trend_scores WHERE artist_id = a.id)
+            LEFT JOIN trend_scores ts_prev ON ts_prev.artist_id = a.id
+                AND ts_prev.id = (SELECT MAX(id) FROM trend_scores WHERE artist_id = a.id AND id < ts.id)
             WHERE ar.sold = 1 {price_clause}
             {medium_clause}
             GROUP BY a.id
@@ -168,10 +180,17 @@ def index():
             ORDER BY medium
         """).fetchall()
 
-        # Stats
-        total_artists = db.execute("SELECT COUNT(*) as c FROM artists").fetchone()["c"]
-        total_results = db.execute("SELECT COUNT(*) as c FROM auction_results WHERE sold = 1").fetchone()["c"]
-        total_signals = db.execute("SELECT COUNT(*) as c FROM price_signals").fetchone()["c"]
+        # Stats (cached — only changes biweekly)
+        if time.time() - _stats_cache["fetched_at"] > _STATS_CACHE_TTL:
+            _stats_cache["data"] = {
+                "artists": db.execute("SELECT COUNT(*) as c FROM artists").fetchone()["c"],
+                "results": db.execute("SELECT COUNT(*) as c FROM auction_results WHERE sold = 1").fetchone()["c"],
+                "signals": db.execute("SELECT COUNT(*) as c FROM price_signals").fetchone()["c"],
+            }
+            _stats_cache["fetched_at"] = time.time()
+        total_artists = _stats_cache["data"]["artists"]
+        total_results = _stats_cache["data"]["results"]
+        total_signals = _stats_cache["data"]["signals"]
 
         # Batch-load colors for displayed artists
         artist_ids = [a["id"] for a in artists]

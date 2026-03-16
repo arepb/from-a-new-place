@@ -125,6 +125,14 @@ def init_db(db_path=None):
             CREATE INDEX IF NOT EXISTS idx_trend_score ON trend_scores(composite_score);
             CREATE INDEX IF NOT EXISTS idx_signal_artist ON price_signals(artist_id);
 
+            -- Performance indexes for dashboard queries
+            CREATE INDEX IF NOT EXISTS idx_artist_slug ON artists(slug);
+            CREATE INDEX IF NOT EXISTS idx_auction_artist_sold ON auction_results(artist_id, sold);
+            CREATE INDEX IF NOT EXISTS idx_auction_sold_price ON auction_results(sold, hammer_price_usd);
+            CREATE INDEX IF NOT EXISTS idx_auction_artist_image ON auction_results(artist_id, image_url, sale_date DESC);
+            CREATE INDEX IF NOT EXISTS idx_signal_date ON price_signals(signal_date DESC);
+            CREATE INDEX IF NOT EXISTS idx_trend_artist_id_desc ON trend_scores(artist_id, id DESC);
+
             CREATE TABLE IF NOT EXISTS artist_colors (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 artist_id INTEGER NOT NULL,

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://d7hftxdivxxvm.cloudfront.net">
     <title>From A New Place — Emerging Artist Auction Price Tracker</title>
     <meta name="description" content="Track {{ total_artists }} emerging artists across {{ total_results|int }} auction results. Heat Index scoring ranks artists by price momentum, sell-through rates, and estimate-beating behavior.">
     <link rel="canonical" href="https://fromanewplace.com/">
@@ -530,9 +531,9 @@
                     <td>
                         <div class="artist-cell">
                             {% if a.artwork_thumb %}
-                                <img src="{{ a.artwork_thumb|upscale(300) }}" class="artist-thumb" alt="" loading="lazy">
+                                <img src="{{ a.artwork_thumb|upscale(300) }}" class="artist-thumb" alt="" loading="lazy" decoding="async">
                             {% elif a.image_url %}
-                                <img src="{{ a.image_url|upscale(300) }}" class="artist-thumb" alt="" loading="lazy">
+                                <img src="{{ a.image_url|upscale(300) }}" class="artist-thumb" alt="" loading="lazy" decoding="async">
                             {% else %}
                                 <div class="artist-thumb"></div>
                             {% endif %}

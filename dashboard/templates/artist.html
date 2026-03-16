@@ -39,7 +39,8 @@
         ]
     }
     </script>
-    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" defer></script>
+    <link rel="preconnect" href="https://cdn.plot.ly">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -413,7 +414,7 @@
                     <td>
                         {% if r.image_url %}
                             {% if r.sale_url %}<a href="{{ r.sale_url }}" target="_blank">{% endif %}
-                            <img src="{{ r.image_url|upscale(400) }}" class="lot-thumb" alt="" loading="lazy">
+                            <img src="{{ r.image_url|upscale(400) }}" class="lot-thumb" alt="" loading="lazy" decoding="async">
                             {% if r.sale_url %}</a>{% endif %}
                         {% endif %}
                     </td>
