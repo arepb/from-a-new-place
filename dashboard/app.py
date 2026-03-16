@@ -278,6 +278,43 @@ def artist_detail(slug):
     )
 
 
+@app.route("/gallery")
+def gallery():
+    """Visual grid of artwork thumbnails for browsing."""
+    page = request.args.get("page", 1, type=int)
+    per_page = 60
+
+    with get_db() as db:
+        # Count total works with images
+        total = db.execute("""
+            SELECT COUNT(*) as c FROM auction_results
+            WHERE image_url IS NOT NULL AND image_url != '' AND sold = 1
+        """).fetchone()["c"]
+
+        total_pages = max(1, (total + per_page - 1) // per_page)
+        page = max(1, min(page, total_pages))
+        offset = (page - 1) * per_page
+
+        # Get works with images, randomized but paginated
+        works = db.execute(f"""
+            SELECT ar.title, ar.sale_url, ar.image_url, ar.hammer_price_usd,
+                   ar.sale_date, ar.auction_house,
+                   a.name as artist_name, a.slug as artist_slug
+            FROM auction_results ar
+            JOIN artists a ON a.id = ar.artist_id
+            WHERE ar.image_url IS NOT NULL AND ar.image_url != '' AND ar.sold = 1
+            ORDER BY ar.sale_date DESC
+            LIMIT {per_page} OFFSET {offset}
+        """).fetchall()
+
+    return render_template(
+        "gallery.html",
+        works=works,
+        page=page,
+        total_pages=total_pages,
+    )
+
+
 @app.route("/discover")
 def discover():
     """Discovery feed — newly tracked artists and first sales."""
